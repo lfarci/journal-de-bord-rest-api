@@ -8,12 +8,18 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Entity
 @Data
 @NoArgsConstructor
 public class Driver {
+
+    private static Optional<Ride> getLastRide(List<Ride> rides) {
+        return rides.stream().max(Comparator.comparing(Ride::getDepartureMoment));
+    }
 
     @Id
     private String pseudonym;
@@ -24,5 +30,10 @@ public class Driver {
 
     @OneToMany(mappedBy = "driver")
     private List<Ride> rides;
+
+    public Boolean isDriving() {
+        Optional<Ride> lastDrive = Driver.getLastRide(rides);
+        return lastDrive.isPresent() && !lastDrive.get().isDone();
+    }
 
 }

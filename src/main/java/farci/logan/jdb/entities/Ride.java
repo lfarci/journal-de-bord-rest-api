@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
+import java.time.LocalDateTime;
 
 /**
  * Represents a journey made with a car by a driver from one stop (departure) to an other (arrival). The driver can
@@ -32,7 +33,6 @@ public class Ride {
     /**
      * Is the stop that ends this ride. This stop should be different than the departure.
      */
-    @NotNull
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "arrival_id", referencedColumnName = "id")
     private Stop arrival;
@@ -54,5 +54,26 @@ public class Ride {
      */
     @Null
     private String comment;
+
+    public Ride(@NotNull Stop departure, @NotNull Driver driver) {
+        this.departure = departure;
+        this.arrival = null;
+        this.driver = driver;
+        this.trafficCondition = TrafficCondition.NORMAL;
+        this.comment = null;
+    }
+
+    /**
+     * Tells if this ride is done. A ride is done when the driver is arrived to its destination.
+     *
+     * @return true if the ride is done.
+     */
+    public Boolean isDone() {
+        return arrival != null;
+    }
+
+    public LocalDateTime getDepartureMoment() {
+        return departure.getMoment();
+    }
 
 }

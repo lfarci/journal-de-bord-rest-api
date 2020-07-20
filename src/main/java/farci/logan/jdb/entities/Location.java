@@ -39,7 +39,13 @@ public class Location {
     /**
      * Is the longitude of the location.
      */
-    @NotNull
+    @NotNull()
     private Double longitude;
 
+    public Location(@NotBlank @NotNull String name, @NotNull Double latitude, @NotNull Double longitude) {
+        this.id = 0L;
+        this.name = name;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 }
