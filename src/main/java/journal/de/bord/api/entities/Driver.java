@@ -1,4 +1,4 @@
-package farci.logan.jdb.entities;
+package journal.de.bord.api.entities;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,9 +31,17 @@ public class Driver {
     @OneToMany(mappedBy = "driver")
     private List<Ride> rides;
 
+    public Boolean hasDriven() {
+        return !rides.isEmpty();
+    }
+
     public Boolean isDriving() {
         Optional<Ride> lastDrive = Driver.getLastRide(rides);
         return lastDrive.isPresent() && !lastDrive.get().isDone();
+    }
+
+    public Optional<Ride> getLastRide() {
+        return Driver.getLastRide(rides);
     }
 
 }

@@ -1,11 +1,12 @@
-package farci.logan.jdb.entities;
+package journal.de.bord.api.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 import java.time.LocalDateTime;
 
 /**
@@ -19,7 +20,12 @@ import java.time.LocalDateTime;
 public class Ride {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(generator = "ride_sequence_generator", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(
+            name = "ride_sequence_generator",
+            sequenceName = "ride_sequence",
+            allocationSize = 1
+    )
     private Long id;
 
     /**
@@ -40,9 +46,9 @@ public class Ride {
     /**
      * Is the person who was driving the vehicle during this ride.
      */
-    @NotNull
     @ManyToOne
     @JoinColumn
+    @JsonIgnore
     private Driver driver;
 
     @NotNull
@@ -52,7 +58,6 @@ public class Ride {
     /**
      * The comment can be used by a driver to explain encountered difficulties.
      */
-    @Null
     private String comment;
 
     public Ride(@NotNull Stop departure, @NotNull Driver driver) {

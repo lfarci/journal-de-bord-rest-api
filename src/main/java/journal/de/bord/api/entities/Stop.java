@@ -1,4 +1,4 @@
-package farci.logan.jdb.entities;
+package journal.de.bord.api.entities;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
@@ -23,7 +22,12 @@ public class Stop {
      * Identifies this entity.
      */
     @Id
-    @GeneratedValue
+    @GeneratedValue(generator = "stop_sequence_generator", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(
+            name = "stop_sequence_generator",
+            sequenceName = "stop_sequence",
+            allocationSize = 1
+    )
     private Long id;
 
     /**

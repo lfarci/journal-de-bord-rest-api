@@ -1,4 +1,4 @@
-package farci.logan.jdb;
+package journal.de.bord.api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

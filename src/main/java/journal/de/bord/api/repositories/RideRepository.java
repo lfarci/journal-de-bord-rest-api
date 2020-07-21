@@ -1,6 +1,6 @@
-package farci.logan.jdb.repositories;
+package journal.de.bord.api.repositories;
 
-import farci.logan.jdb.entities.Ride;
+import journal.de.bord.api.entities.Ride;
 import org.springframework.data.repository.CrudRepository;
 
 public interface RideRepository extends CrudRepository<Ride, Long> {

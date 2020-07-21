@@ -1,9 +1,7 @@
-package farci.logan.jdb.repositories;
+package journal.de.bord.api.repositories;
 
-import farci.logan.jdb.entities.Driver;
+import journal.de.bord.api.entities.Driver;
 import org.springframework.data.repository.CrudRepository;
-
-import java.util.Optional;
 
 public interface DriverRepository extends CrudRepository<Driver, String> {
 }

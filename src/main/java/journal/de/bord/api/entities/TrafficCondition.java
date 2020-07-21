@@ -1,4 +1,4 @@
-package farci.logan.jdb.entities;
+package journal.de.bord.api.entities;
 
 /**
  * Represents the level of the traffic condition for a drive.

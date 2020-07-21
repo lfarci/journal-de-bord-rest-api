@@ -1,4 +1,4 @@
-package farci.logan.jdb.entities;
+package journal.de.bord.api.entities;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,7 +20,12 @@ public class Location {
      * Identifies this entity.
      */
     @Id
-    @GeneratedValue
+    @GeneratedValue(generator = "location_sequence_generator", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(
+            name = "location_sequence_generator",
+            sequenceName = "location_sequence",
+            allocationSize = 1
+    )
     private Long id;
 
     /**
