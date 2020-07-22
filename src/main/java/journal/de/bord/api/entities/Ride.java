@@ -1,10 +1,8 @@
 package journal.de.bord.api.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -90,12 +88,18 @@ public class Ride {
      *
      * @return true if the ride is done.
      */
+    @JsonIgnore
     public Boolean isDone() {
         return arrival != null;
     }
 
+    @JsonIgnore
     public LocalDateTime getDepartureMoment() {
         return departure.getMoment();
+    }
+
+    public Boolean isDriver(String pseudonym) {
+        return this.getDriver().getPseudonym().equals(pseudonym);
     }
 
 }

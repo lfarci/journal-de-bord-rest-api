@@ -1,5 +1,6 @@
 package journal.de.bord.api.services;
 
+import journal.de.bord.api.dto.RideDto;
 import journal.de.bord.api.dto.StopDto;
 import journal.de.bord.api.entities.Driver;
 import journal.de.bord.api.entities.Ride;
@@ -48,7 +49,7 @@ public interface RideService {
      * @param ride is the updated ride.
      * @throws NullPointerException when the ride argument is null.
      */
-    void update(Ride ride);
+    void update(RideDto ride);
 
     /**
      * Deletes the specified ride owned by the given driver.

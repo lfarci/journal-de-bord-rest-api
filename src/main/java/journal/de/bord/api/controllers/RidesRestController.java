@@ -1,5 +1,6 @@
 package journal.de.bord.api.controllers;
 
+import journal.de.bord.api.dto.RideDto;
 import journal.de.bord.api.dto.StopDto;
 import journal.de.bord.api.entities.Driver;
 import journal.de.bord.api.entities.Ride;
@@ -14,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -75,41 +77,27 @@ public class RidesRestController {
             @PathVariable("pseudonym") String pseudonym,
             @RequestParam("last") Optional<Boolean> last
     ) {
-        Optional<Driver> driver = driverRepository.findById(pseudonym);
-        if (driver.isPresent()) {
-            if (driver.get().hasDriven() && last.isPresent() && last.get()) {
-                return ResponseEntity.ok(Arrays.asList(driver.get().getLastRide().get()));
-            } else {
-                return ResponseEntity.ok(driver.get().getRides());
-            }
-        } else {
+        try {
+            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            List<Ride> rides = rideDatabaseTable.getAllDriverRides(driver, last);
+            return ResponseEntity.ok(rides);
+        } catch (NullPointerException | IllegalArgumentException exception) {
             String errorMessage = "No driver with the pseudonym " + pseudonym;
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, errorMessage);
         }
     }
 
-    @PatchMapping(path = RIDE_RESOURCE_PATH)
+    @PutMapping(path = RIDES_RESOURCE_PATH)
     public ResponseEntity update(
             @PathVariable("pseudonym") String pseudonym,
-            @PathVariable("identifier") String identifier,
-            @RequestBody Ride updatedRide
+            @RequestBody RideDto ride
     ) {
-//        Optional<Ride> ride = rideRepository.findById(updatedRide.getId());
-//        // TODO: is the provided ride valid? The departure should be before the arrival
-//        if (ride.isPresent()) {
-//            // TODO: check the driver pseudonym and throw a 404 if it does not match
-//            Ride newRide = ride.get();
-//            newRide.setArrival(updatedRide.getArrival());
-//            newRide.setTrafficCondition(updatedRide.getTrafficCondition());
-//            newRide.setComment(updatedRide.getComment());
-//            System.out.println("updated ride is...\n" + newRide.getDriver().getPseudonym());
-////            rideRepository.save(newRide);
-//            return new ResponseEntity(HttpStatus.NO_CONTENT);
-//        } else {
-//            String errorMessage = "No ride with the specified identifier " + identifier;
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, errorMessage);
-//        }
-        return ResponseEntity.ok("update");
+        try {
+            rideDatabaseTable.update(ride);
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        } catch (IllegalArgumentException exception) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
     }
 
     @DeleteMapping(path = RIDE_RESOURCE_PATH)
