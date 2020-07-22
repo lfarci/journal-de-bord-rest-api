@@ -1,6 +1,7 @@
 package journal.de.bord.api.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.lang.Nullable;
@@ -60,10 +61,26 @@ public class Ride {
      */
     private String comment;
 
-    public Ride(@NotNull Stop departure, @NotNull Driver driver) {
+    public Ride(@NotNull Stop departure, Driver driver) {
         this.departure = departure;
         this.arrival = null;
         this.driver = driver;
+        this.trafficCondition = TrafficCondition.NORMAL;
+        this.comment = null;
+    }
+
+    public Ride(@NotNull Stop departure) {
+        this.departure = departure;
+        this.arrival = null;
+        this.driver = null;
+        this.trafficCondition = TrafficCondition.NORMAL;
+        this.comment = null;
+    }
+
+    public Ride(@NotNull Stop departure, @NotNull Stop arrival) {
+        this.departure = departure;
+        this.arrival = arrival;
+        this.driver = null;
         this.trafficCondition = TrafficCondition.NORMAL;
         this.comment = null;
     }

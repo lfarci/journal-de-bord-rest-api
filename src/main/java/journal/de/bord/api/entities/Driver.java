@@ -1,5 +1,8 @@
 package journal.de.bord.api.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +17,7 @@ import java.util.Optional;
 
 @Entity
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
 public class Driver {
 
@@ -29,6 +33,7 @@ public class Driver {
     private Long objective;
 
     @OneToMany(mappedBy = "driver")
+    @JsonIgnore
     private List<Ride> rides;
 
     public Boolean hasDriven() {
@@ -42,6 +47,29 @@ public class Driver {
 
     public Optional<Ride> getLastRide() {
         return Driver.getLastRide(rides);
+    }
+
+    /**
+     * Tells if this driver can start a new ride with the given stop. A driver
+     * can start a new ride in if one of the following is true:
+     * - The driver hasn't driven before.
+     * - The driver is not driving.
+     * - The driver last arrival took place before the given stop.
+     *
+     * @param stop is the stop that this driver can start with.
+     * @return true if this driver can start with the given stop.
+     */
+    public Boolean canStartWith(Stop stop) {
+        return stop != null
+                && !hasDriven()
+                || (!isDriving() && isStopAfterLastRideArrival(stop));
+    }
+
+    private Boolean isStopAfterLastRideArrival(Stop stop) {
+        Optional<Ride> lastRide = getLastRide();
+        return stop != null
+                && lastRide.isPresent()
+                && stop.isAfter(lastRide.get().getArrival());
     }
 
 }
