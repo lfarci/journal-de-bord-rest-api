@@ -1,5 +1,7 @@
 package journal.de.bord.api.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import journal.de.bord.api.dto.LocationDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +17,10 @@ import javax.validation.constraints.NotNull;
 @Data
 @NoArgsConstructor
 public class Location {
+
+    public static Location from(LocationDto data) {
+        return new Location(data.getName(), data.getLatitude(), data.getLongitude());
+    }
 
     /**
      * Identifies this entity.
@@ -47,10 +53,22 @@ public class Location {
     @NotNull()
     private Double longitude;
 
+    @ManyToOne
+    @JoinColumn
+    @JsonIgnore
+    private Driver driver;
+
     public Location(@NotBlank @NotNull String name, @NotNull Double latitude, @NotNull Double longitude) {
-        this.id = 0L;
+        this.id = -1L;
         this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;
     }
+
+    public void setValues(LocationDto data) {
+        setName(data.getName());
+        setLatitude(data.getLatitude());
+        setLongitude(data.getLongitude());
+    }
+
 }

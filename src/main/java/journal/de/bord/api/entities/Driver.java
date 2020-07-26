@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Entity
 @Data
@@ -35,6 +36,10 @@ public class Driver {
     @OneToMany(mappedBy = "driver")
     @JsonIgnore
     private List<Ride> rides;
+
+    @OneToMany(mappedBy = "driver")
+    @JsonIgnore
+    private List<Location> locations;
 
     public Boolean hasDriven() {
         return !rides.isEmpty();
@@ -70,6 +75,13 @@ public class Driver {
         return stop != null
                 && lastRide.isPresent()
                 && stop.isAfter(lastRide.get().getArrival());
+    }
+
+    public Location getLocationById(Long identifier) {
+        List<Location> results = locations.stream()
+                .filter(l -> l.getId().equals(identifier))
+                .collect(Collectors.toList());
+        return results.isEmpty() ? null : results.get(0);
     }
 
 }

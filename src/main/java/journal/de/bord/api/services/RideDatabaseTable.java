@@ -92,7 +92,6 @@ public class RideDatabaseTable implements RideService {
             throw new IllegalStateException("Trying to update a ride with invalid data");
         }
         Ride ride = findById(identifier);
-
         if (!ride.isDriver(data.getDriverPseudonym())) {
             throw new IllegalArgumentException("Driver mismatch");
         }

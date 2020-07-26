@@ -1,9 +1,9 @@
 insert into driver (pseudonym, objective) values ('lofaloa', 10000);
 
-insert into location (id, name, latitude, longitude) values (0, 'Domicile', 45.555, 34.333);
-insert into location (id, name, latitude, longitude) values (1, 'Cinéma', 45.555, 34.333);
-insert into location (id, name, latitude, longitude) values (2, 'Magasin', 45.555, 34.333);
-insert into location (id, name, latitude, longitude) values (3, 'Parc', 45.555, 34.333);
+insert into location (id, name, latitude, longitude, driver_pseudonym) values (0, 'Domicile', 45.555, 34.333, 'lofaloa');
+insert into location (id, name, latitude, longitude, driver_pseudonym) values (1, 'Cinéma', 45.555, 34.333, 'lofaloa');
+insert into location (id, name, latitude, longitude, driver_pseudonym) values (2, 'Magasin', 45.555, 34.333, 'lofaloa');
+insert into location (id, name, latitude, longitude, driver_pseudonym) values (3, 'Parc', 45.555, 34.333, 'lofaloa');
 
 insert into stop (id, moment, odometer_value, location) values (0, {ts '2020-01-01 12:00:00.00'}, 10000, 0);
 insert into stop (id, moment, odometer_value, location) values (1, {ts '2020-01-01 12:20:01.00'}, 10034, 1);

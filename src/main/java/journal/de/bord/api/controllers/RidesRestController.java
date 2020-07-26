@@ -129,7 +129,7 @@ public class RidesRestController {
         try {
             rideDatabaseTable.deleteById(identifier);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
-        } catch (NullPointerException | NumberFormatException e) {
+        } catch (NullPointerException | IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
     }
