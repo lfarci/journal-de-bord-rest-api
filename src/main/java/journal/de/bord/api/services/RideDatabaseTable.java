@@ -12,22 +12,42 @@ import journal.de.bord.api.repositories.RideRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import java.util.*;
 
 @Service
 public class RideDatabaseTable implements RideService {
 
     @Autowired
-    RideRepository rideRepository;
+    private RideRepository rideRepository;
 
     @Autowired
-    DriverRepository driverRepository;
+    private DriverRepository driverRepository;
 
     @Autowired
-    LocationService locationService;
+    private LocationService locationService;
+
+    private Validator validator;
+
+    public RideDatabaseTable() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        this.validator = factory.getValidator();
+    }
+
+    @Override
+    public Ride findById(String identifier) {
+        try {
+            Objects.requireNonNull(identifier, "\"identifier\" argument is null.");
+            return rideRepository
+                    .findById(Long.parseLong(identifier))
+                    .orElseThrow(() -> new IllegalArgumentException("The ride doesn't exist."));
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException("The id should be a parsable long: " + identifier);
+        }
+    }
 
     @Override
     public List<Ride> getAllDriverRides(Driver driver, Optional<Boolean> last) {
@@ -42,15 +62,13 @@ public class RideDatabaseTable implements RideService {
         return driver.getRides();
     }
 
-    private Stop fromDto(StopDto stopDto) {
-        Location location = locationService.findById(stopDto.getLocationId());
-        return new Stop(stopDto.getMoment(), stopDto.getOdometerValue(), location);
-    }
-
     @Override
     public void start(Driver driver, StopDto departure) {
         Objects.requireNonNull(driver, "\"driver\" argument is null.");
         Objects.requireNonNull(driver, "\"stop\" argument is null.");
+        if (!isValid(departure)) {
+            throw new IllegalStateException();
+        }
         Stop stop = fromDto(departure);
         if (!driver.canStartWith(stop)) {
             throw new IllegalStateException(driver.getPseudonym() + " cannot start a ride.");
@@ -64,25 +82,51 @@ public class RideDatabaseTable implements RideService {
         rideRepository.save(new Ride(stop, driver));
     }
 
+
+
     @Override
-    public void update(RideDto updatedRide) {
-        Objects.requireNonNull(updatedRide, "\"updatedRide\" argument is null.");
-        Ride ride = rideRepository
-                .findById(updatedRide.getRideId())
-                .orElseThrow(() -> new IllegalArgumentException("The ride doesn't exist."));
-        if (!ride.isDriver(updatedRide.getDriverPseudonym())) {
+    public void update(String identifier, RideDto data) {
+        Objects.requireNonNull(identifier, "\"identifier\" argument is null.");
+        Objects.requireNonNull(data, "\"data\" argument is null.");
+        if (!isValid(data)) {
+            throw new IllegalStateException("Trying to update a ride with invalid data");
+        }
+        Ride ride = findById(identifier);
+
+        if (!ride.isDriver(data.getDriverPseudonym())) {
             throw new IllegalArgumentException("Driver mismatch");
         }
-        ride.setDeparture(fromDto(updatedRide.getDeparture()));
-        ride.setArrival(fromDto(updatedRide.getArrival()));
-        ride.setTrafficCondition(updatedRide.getTrafficCondition());
-        ride.setComment(updatedRide.getComment());
+        updateRide(ride, data);
         rideRepository.save(ride);
     }
 
     @Override
-    public void deleteById(Long rideId) {
+    public void deleteById(String rideId) {
         Objects.requireNonNull(rideId, "\"rideId\" argument is null.");
-        rideRepository.deleteById(rideId);
+        Ride ride = findById(rideId);
+        rideRepository.delete(ride);
     }
+
+    private Boolean isValid(RideDto data) {
+        Set<ConstraintViolation<RideDto>> violations = validator.validate(data);
+        return violations.size() == 0;
+    }
+
+    private Boolean isValid(StopDto data) {
+        Set<ConstraintViolation<StopDto>> violations = validator.validate(data);
+        return violations.size() == 0;
+    }
+
+    private Stop fromDto(StopDto stopDto) {
+        Location location = locationService.findById(stopDto.getLocationId());
+        return new Stop(stopDto.getMoment(), stopDto.getOdometerValue(), location);
+    }
+
+    private void updateRide(Ride ride, RideDto data) {
+        ride.setDeparture(fromDto(data.getDeparture()));
+        ride.setArrival(fromDto(data.getArrival()));
+        ride.setTrafficCondition(data.getTrafficCondition());
+        ride.setComment(data.getComment());
+    }
+
 }

@@ -1,6 +1,7 @@
 package journal.de.bord.api.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import journal.de.bord.api.dto.RideDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

@@ -20,8 +20,6 @@ public class RideDto {
     @NotNull
     private StopDto departure;
 
-    @NotNull
-    @Null
     private StopDto arrival;
 
     @NotNull

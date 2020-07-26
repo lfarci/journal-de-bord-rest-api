@@ -4,12 +4,21 @@ import journal.de.bord.api.dto.RideDto;
 import journal.de.bord.api.dto.StopDto;
 import journal.de.bord.api.entities.Driver;
 import journal.de.bord.api.entities.Ride;
-import journal.de.bord.api.entities.Stop;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface RideService {
+
+    /**
+     * Finds a ride by id.
+     *
+     * @param id is the identifier of the ride to find.
+     * @return the ride with the specified id.
+     * @throws IllegalArgumentException if the given id doesn't exist or is not a parsable long.
+     * @throws NullPointerException if the id is null.
+     */
+    Ride findById(String id);
 
     /**
      * Gets a list of rides for the specified driver.
@@ -39,17 +48,21 @@ public interface RideService {
      * @throws IllegalArgumentException when the specified driver or stop
      * location does not exist.
      * @throws IllegalStateException when the driver is currently driving or
-     * when the given departure took place before the last driver arrival.
+     * when the given departure took place before the last driver arrival. Also
+     * if the departure is not valid.
      */
     void start(Driver driver, StopDto departure);
 
     /**
      * Updates the specified ride.
      *
+     * @param identifier is the id of the ride to update.
      * @param ride is the updated ride.
      * @throws NullPointerException when the ride argument is null.
+     * @throws IllegalArgumentException if the given id does not exist.
+     * @throws IllegalStateException if the ride data is not valid.
      */
-    void update(RideDto ride);
+    void update(String identifier, RideDto ride);
 
     /**
      * Deletes the specified ride owned by the given driver.
@@ -58,7 +71,8 @@ public interface RideService {
      * @throws NullPointerException when the rideId is null.
      * @throws IllegalArgumentException when the specified driver does not
      * exist or the ride id doesn't match any records.
+     * @throws NumberFormatException if the string does not contain a parsable long.
      */
-    void deleteById(Long rideId);
+    void deleteById(String rideId);
 
 }

@@ -1,5 +1,6 @@
 package journal.de.bord.api.entities;
 
+import journal.de.bord.api.dto.StopDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
