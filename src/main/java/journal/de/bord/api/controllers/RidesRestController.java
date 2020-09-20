@@ -71,6 +71,7 @@ public class RidesRestController {
      * @return the response containing a list of rides.
      * @throws ResponseStatusException 404 the specified driver does not exist.
      */
+    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping(path = RIDES_RESOURCE_PATH)
     public ResponseEntity rides(
             @PathVariable("pseudonym") String pseudonym,

@@ -13,7 +13,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.cors()
                 .and()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/user/info", "/api/**")
+                .antMatchers(HttpMethod.GET, "/api/**")
                 .hasAuthority("SCOPE_read")
                 .antMatchers(HttpMethod.POST, "/api/**")
                 .hasAuthority("SCOPE_write")
