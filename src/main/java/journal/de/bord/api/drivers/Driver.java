@@ -43,6 +43,10 @@ public class Driver {
     @JsonIgnore
     private List<Location> locations;
 
+    @OneToMany(mappedBy = "driver")
+    @JsonIgnore
+    private List<Stop> stops;
+
     public Boolean hasDriven() {
         return !rides.isEmpty();
     }
@@ -82,6 +86,13 @@ public class Driver {
     public Location getLocationById(Long identifier) {
         List<Location> results = locations.stream()
                 .filter(l -> l.getId().equals(identifier))
+                .collect(Collectors.toList());
+        return results.isEmpty() ? null : results.get(0);
+    }
+
+    public Stop getStopById(Long identifier) {
+        List<Stop> results = stops.stream()
+                .filter(s -> s.getId().equals(identifier))
                 .collect(Collectors.toList());
         return results.isEmpty() ? null : results.get(0);
     }

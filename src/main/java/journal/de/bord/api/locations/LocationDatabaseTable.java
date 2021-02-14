@@ -58,7 +58,6 @@ public class LocationDatabaseTable implements LocationService {
         }
         Location location = Location.from(data);
         location.setDriver(driver);
-        // TODO: handling insertion error
         locationRepository.save(location);
     }
 

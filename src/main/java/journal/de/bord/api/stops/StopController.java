@@ -30,6 +30,9 @@ public class StopController {
     @Autowired
     private StopDatabaseTable stopDatabaseTable;
 
+    @Autowired
+    private LocationDatabaseTable locationDatabaseTable;
+
     /**
      * Creates a new stop for the specified driver.
      *
@@ -41,7 +44,8 @@ public class StopController {
      * @param pseudonym is the pseudonym of the driver to create a new stop for.
      * @return the response without content (created status, 201).
      * @throws ResponseStatusException when the driver does not exist (404). Or
-     * when the provided location id is not found (422).
+     * when the provided location id is not found (422). Or when one of the
+     * driver stop has already taken place at the given location and moment.
      */
     @PostMapping(path = STOPS_RESOURCE_PATH)
     public ResponseEntity create(
@@ -49,7 +53,15 @@ public class StopController {
             @Valid @RequestBody StopDto stop
     ) {
         try {
-            return ResponseEntity.ok("Stop creation end-point.");
+            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            Long locationId = stop.getLocationId();
+            if (locationDatabaseTable.existsById(locationId)) {
+                Location location = locationDatabaseTable.findById(locationId);
+                stopDatabaseTable.createNewStopFor(driver, stop, location);
+                return new ResponseEntity(HttpStatus.CREATED);
+            } else {
+                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
+            }
         } catch (NullPointerException | IllegalArgumentException exception) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         } catch (IllegalStateException exception) {
@@ -72,7 +84,9 @@ public class StopController {
             @PathVariable("identifier") String identifier
     ) {
         try {
-            return ResponseEntity.ok("Get a stop with id: " + identifier);
+            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            Stop stop = stopDatabaseTable.findStopFor(driver, identifier);
+            return ResponseEntity.ok(stop);
         } catch (NullPointerException | IllegalArgumentException exception) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, exception.getMessage());
         }

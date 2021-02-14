@@ -2,76 +2,52 @@ package journal.de.bord.api.stops;
 
 import journal.de.bord.api.drivers.Driver;
 import journal.de.bord.api.locations.Location;
-import journal.de.bord.api.locations.LocationDto;
+import journal.de.bord.api.stops.Stop;
+import journal.de.bord.api.stops.StopDto;
 
 import java.util.List;
 
 public interface StopService {
 
     /**
-     * Finds a stop by id.
+     * Gets one of the driver Stop with the specified id.
      *
-     * @param stopId is the stop id.
-     * @return the stop recorded with the given id.
-     * @throws IllegalArgumentException when the given id does not match any
-     * record.
+     * @param driver is the driver to get a Stop for.
+     * @param identifier is the Stop id.
+     * @return the Stop with the specified id.
      */
-    Location findById(Long stopId);
+    Stop findStopFor(Driver driver, String identifier);
 
     /**
-     * Gets one of the driver location with the specified id.
+     * Creates a new Stop.
      *
-     * @param driver is the driver to get a location for.
-     * @param identifier is the location id.
-     * @return the location with the specified id.
-     */
-    Location findStopFor(Driver driver, String identifier);
-
-    /**
-     * Gets all the locations visited by a driver.
-     *
-     * @param driver is the driver that visited the locations to find.
-     * @return the locations that the given driver visited.
-     */
-    List<Location> findAllStopsFor(Driver driver);
-
-    /**
-     * Tells if a location with the given id exists.
-     *
-     * @param locationId is the id of the location.
-     * @return true if the location id exists.
-     */
-    Boolean existsById(Long locationId);
-
-    /**
-     * Creates a new location.
-     *
-     * @param driver is the location owner.
-     * @param location is the new location.
-     * @throws IllegalStateException if the new location name already exists.
+     * @param driver is the Stop owner.
+     * @param stop is the new Stop.
+     * @param location is the location associated with the stop to create.
+     * @throws IllegalStateException if the new Stop name already exists.
      * @throws NullPointerException is one of the argument is null.
      */
-    void createNewStopFor(Driver driver, LocationDto location);
+    void createNewStopFor(Driver driver, StopDto stop, Location location);
 
     /**
-     * Updates the specified location.
+     * Updates the specified Stop.
      *
-     * @param driver is the driver that has visited the location.
-     * @param identifier is the id of the location to update.
-     * @param data is the updated location.
+     * @param driver is the driver that has visited the Stop.
+     * @param identifier is the id of the Stop to update.
+     * @param data is the updated Stop.
      * @throws NullPointerException if one of the argument is null.
      * @throws IllegalArgumentException if the given id does not exist.
-     * @throws IllegalStateException if the location data is not valid.
+     * @throws IllegalStateException if the Stop data is not valid.
      */
-    void updateStopFor(Driver driver, String identifier, LocationDto data);
+    void updateStopFor(Driver driver, String identifier, StopDto data);
 
     /**
-     * Deletes the specified location.
+     * Deletes the specified Stop.
      *
-     * @Driver driver is the driver to delete a location for.
-     * @param identifier is the location id of the entity to be deleted.
+     * @Driver driver is the driver to delete a Stop for.
+     * @param identifier is the Stop id of the entity to be deleted.
      * @throws NullPointerException when the identifier is null.
-     * @throws IllegalArgumentException when the specified location does not
+     * @throws IllegalArgumentException when the specified Stop does not
      * exist.
      * @throws NumberFormatException if the string does not contain a parsable long.
      */
