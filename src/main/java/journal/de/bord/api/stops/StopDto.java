@@ -1,4 +1,4 @@
-package journal.de.bord.api.dto;
+package journal.de.bord.api.stops;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

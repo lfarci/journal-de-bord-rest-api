@@ -1,4 +1,4 @@
-package journal.de.bord.api.entities;
+package journal.de.bord.api.stops;
 
 import journal.de.bord.api.locations.Location;
 import lombok.AllArgsConstructor;

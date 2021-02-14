@@ -1,12 +1,8 @@
-package journal.de.bord.api.controllers;
+package journal.de.bord.api.rides;
 
-import journal.de.bord.api.dto.RideDto;
-import journal.de.bord.api.dto.StopDto;
-import journal.de.bord.api.entities.Driver;
-import journal.de.bord.api.entities.Ride;
-import journal.de.bord.api.repositories.DriverRepository;
-import journal.de.bord.api.services.DriverDatabaseTable;
-import journal.de.bord.api.services.RideDatabaseTable;
+import journal.de.bord.api.stops.StopDto;
+import journal.de.bord.api.drivers.Driver;
+import journal.de.bord.api.drivers.DriverDatabaseTable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

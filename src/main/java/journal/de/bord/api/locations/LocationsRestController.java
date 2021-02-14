@@ -1,7 +1,7 @@
 package journal.de.bord.api.locations;
 
-import journal.de.bord.api.entities.Driver;
-import journal.de.bord.api.services.DriverDatabaseTable;
+import journal.de.bord.api.drivers.Driver;
+import journal.de.bord.api.drivers.DriverDatabaseTable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

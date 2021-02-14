@@ -1,7 +1,7 @@
 package journal.de.bord.api.locations;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import journal.de.bord.api.entities.Driver;
+import journal.de.bord.api.drivers.Driver;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

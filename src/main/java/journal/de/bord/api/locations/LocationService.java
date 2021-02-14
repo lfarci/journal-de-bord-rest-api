@@ -1,8 +1,6 @@
 package journal.de.bord.api.locations;
 
-import journal.de.bord.api.locations.LocationDto;
-import journal.de.bord.api.entities.Driver;
-import journal.de.bord.api.locations.Location;
+import journal.de.bord.api.drivers.Driver;
 
 import java.util.List;
 

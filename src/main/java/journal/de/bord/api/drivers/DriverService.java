@@ -1,6 +1,6 @@
-package journal.de.bord.api.services;
+package journal.de.bord.api.drivers;
 
-import journal.de.bord.api.entities.Driver;
+import journal.de.bord.api.drivers.Driver;
 
 public interface DriverService {
 

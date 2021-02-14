@@ -1,6 +1,6 @@
 package journal.de.bord.api.locations;
 
-import journal.de.bord.api.entities.Driver;
+import journal.de.bord.api.drivers.Driver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

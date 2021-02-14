@@ -1,6 +1,9 @@
 package journal.de.bord.api.entities;
 
+import journal.de.bord.api.drivers.Driver;
 import journal.de.bord.api.locations.Location;
+import journal.de.bord.api.rides.Ride;
+import journal.de.bord.api.stops.Stop;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
