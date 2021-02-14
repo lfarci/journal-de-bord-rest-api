@@ -1,15 +1,11 @@
-package journal.de.bord.api.services;
+package journal.de.bord.api.locations;
 
-import journal.de.bord.api.dto.LocationDto;
 import journal.de.bord.api.entities.Driver;
-import journal.de.bord.api.entities.Location;
-import journal.de.bord.api.repositories.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class LocationDatabaseTable implements LocationService {

@@ -1,5 +1,6 @@
 package journal.de.bord.api.entities;
 
+import journal.de.bord.api.locations.Location;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;

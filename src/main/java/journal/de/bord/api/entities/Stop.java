@@ -1,6 +1,6 @@
 package journal.de.bord.api.entities;
 
-import journal.de.bord.api.dto.StopDto;
+import journal.de.bord.api.locations.Location;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +10,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 /**
  * Represents a stop made by a driver during one of his rides. For now only the ride departure and ride arrival are
