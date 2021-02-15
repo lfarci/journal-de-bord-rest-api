@@ -90,7 +90,7 @@ public class LocationDatabaseTable implements LocationService {
         try {
             Location location = findLocationFor(driver, identifier);
             locationRepository.delete(location);
-        } catch (NonTransientDataAccessException e) {
+        } catch (DataIntegrityViolationException e) {
             String message = String.format(
                 "Location with id %s cannot be deleted: %s",
                 identifier, e.getMessage()
