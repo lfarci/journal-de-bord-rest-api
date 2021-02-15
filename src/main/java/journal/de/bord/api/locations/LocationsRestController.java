@@ -102,7 +102,9 @@ public class LocationsRestController {
      * @param identifier is the location id.
      * @param data is the data of the new location.
      * @return the response without content (204).
-     * @throws ResponseStatusException if the identifier or the data is not valid.
+     * @throws ResponseStatusException when the identifier or the driver is
+     * unknown (404). Or when the body contains a valid location with a name
+     * that already exist (409).
      */
     @PutMapping(path = LOCATION_RESOURCE_PATH)
     public ResponseEntity update(
@@ -114,8 +116,10 @@ public class LocationsRestController {
             Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
             locationDatabaseTable.updateLocationFor(driver, identifier, data);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
-        } catch (NullPointerException | IllegalArgumentException exception) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, exception.getMessage());
+        } catch (NullPointerException | IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
 
@@ -125,7 +129,9 @@ public class LocationsRestController {
      * @param pseudonym is the pseudonym of the driver.
      * @param identifier is the location id.
      * @return the response without content (204).
-     * @throws ResponseStatusException if the driver or the location cannot be found (404).
+     * @throws ResponseStatusException if the driver or the location cannot be
+     * found (404). Or when the location is referenced by one of the driver's
+     * stop (409).
      */
     @DeleteMapping(path = LOCATION_RESOURCE_PATH)
     public ResponseEntity delete(
@@ -137,7 +143,9 @@ public class LocationsRestController {
             locationDatabaseTable.deleteLocationFor(driver, identifier);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         } catch (NullPointerException | IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
 
