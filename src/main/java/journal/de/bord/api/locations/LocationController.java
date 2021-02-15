@@ -15,7 +15,7 @@ import java.util.List;
  * The controller handle the REST interface exposing the locations resources.
  */
 @RestController
-public class LocationsRestController {
+public class LocationController {
 
     private static final String LOCATIONS_RESOURCE_PATH = "/api/drivers/{pseudonym}/locations";
     private static final String LOCATION_RESOURCE_PATH = "/api/drivers/{pseudonym}/locations/{identifier}";
@@ -48,10 +48,10 @@ public class LocationsRestController {
             Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
             locationDatabaseTable.createNewLocationFor(driver, location);
             return new ResponseEntity(HttpStatus.CREATED);
-        } catch (NullPointerException | IllegalArgumentException exception) {
+        } catch (NullPointerException | IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        } catch (IllegalStateException exception) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
+        } catch (IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
         }
     }
 
