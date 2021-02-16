@@ -1,5 +1,7 @@
 package journal.de.bord.api.drivers;
 
+import java.util.List;
+
 public interface DriverService {
     
     /**
@@ -23,6 +25,13 @@ public interface DriverService {
     Driver findById(String identifier);
 
     /**
+     * Finds all the drivers.
+     *
+     * @return the list of drivers.
+     */
+    Iterable<Driver> findAll();
+
+    /**
      * Creates a new driver.
      *
      * @param driver contains the data of the new driver.
@@ -43,9 +52,9 @@ public interface DriverService {
     /**
      * Deletes the specified driver.
      *
-     * @param driver is the driver to delete.
+     * @param identifier is the id of the driver to delete.
      * @throws NullPointerException when the identifier argument is null.
      */
-    void delete(DriverDto driver);
+    void deleteById(String identifier);
 
 }

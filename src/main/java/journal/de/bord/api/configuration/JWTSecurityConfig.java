@@ -3,10 +3,18 @@ package journal.de.bord.api.configuration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 @Configuration
 public class JWTSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        web
+                .ignoring()
+                .antMatchers("/h2-console/**");
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -20,4 +28,5 @@ public class JWTSecurityConfig extends WebSecurityConfigurerAdapter {
                         .anyRequest().authenticated())
                         .oauth2ResourceServer(oauth2 -> oauth2.jwt());
     }
+
 }
