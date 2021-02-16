@@ -101,7 +101,7 @@ public class Ride {
     }
 
     public Boolean isDriver(String pseudonym) {
-        return this.getDriver().getPseudonym().equals(pseudonym);
+        return this.getDriver().getIdentifier().equals(pseudonym);
     }
 
 }

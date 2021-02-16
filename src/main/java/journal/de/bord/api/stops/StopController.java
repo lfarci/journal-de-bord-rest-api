@@ -4,7 +4,6 @@ import journal.de.bord.api.drivers.Driver;
 import journal.de.bord.api.drivers.DriverDatabaseTable;
 import journal.de.bord.api.locations.Location;
 import journal.de.bord.api.locations.LocationDatabaseTable;
-import journal.de.bord.api.locations.LocationDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
-import java.util.List;
 
 /**
  * The controller handle the REST interface exposing the stops resources.
@@ -53,7 +51,7 @@ public class StopController {
             @Valid @RequestBody StopDto stop
     ) {
         try {
-            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            Driver driver = driverDatabaseTable.findById(pseudonym);
             Long locationId = stop.getLocationId();
             if (locationDatabaseTable.existsById(locationId)) {
                 Location location = locationDatabaseTable.findById(locationId);
@@ -84,7 +82,7 @@ public class StopController {
             @PathVariable("identifier") String identifier
     ) {
         try {
-            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            Driver driver = driverDatabaseTable.findById(pseudonym);
             Stop stop = stopDatabaseTable.findStopFor(driver, identifier);
             return ResponseEntity.ok(stop);
         } catch (NullPointerException | IllegalArgumentException exception) {

@@ -25,6 +25,8 @@ public class LocationDatabaseTable implements LocationService {
 
     @Override
     public Location findLocationFor(Driver driver, String identifier) {
+        Objects.requireNonNull(driver, "\"driver\" argument is null");
+        Objects.requireNonNull(identifier, "\"identifier\" argument is null");
         try {
             Location result = driver.getLocationById(Long.parseLong(identifier));
             if (result == null) {
