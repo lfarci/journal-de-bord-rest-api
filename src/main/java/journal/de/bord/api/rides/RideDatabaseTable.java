@@ -68,10 +68,10 @@ public class RideDatabaseTable implements RideService {
         }
         Stop stop = fromDto(departure);
         if (!driver.canStartWith(stop)) {
-            throw new IllegalStateException(driver.getPseudonym() + " cannot start a ride.");
+            throw new IllegalStateException(driver.getIdentifier() + " cannot start a ride.");
         }
-        if (!driverRepository.existsById(driver.getPseudonym())) {
-            throw new IllegalArgumentException(driver.getPseudonym() + " doesn't exist.");
+        if (!driverRepository.existsById(driver.getIdentifier())) {
+            throw new IllegalArgumentException(driver.getIdentifier() + " doesn't exist.");
         }
         if (!locationService.existsById(stop.getLocation().getId())) {
             throw new IllegalArgumentException("The departure location doesn't exist.");

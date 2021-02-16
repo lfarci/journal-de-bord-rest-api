@@ -45,7 +45,7 @@ public class LocationController {
             @Valid @RequestBody LocationDto location
     ) {
         try {
-            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            Driver driver = driverDatabaseTable.findById(pseudonym);
             locationDatabaseTable.createNewLocationFor(driver, location);
             return new ResponseEntity(HttpStatus.CREATED);
         } catch (NullPointerException | IllegalArgumentException e) {
@@ -69,7 +69,7 @@ public class LocationController {
             @PathVariable("identifier") String identifier
     ) {
         try {
-            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            Driver driver = driverDatabaseTable.findById(pseudonym);
             Location location = locationDatabaseTable.findLocationFor(driver, identifier);
             return ResponseEntity.ok(location);
         } catch (NullPointerException | IllegalArgumentException exception) {
@@ -87,7 +87,7 @@ public class LocationController {
     @GetMapping(path = LOCATIONS_RESOURCE_PATH)
     public ResponseEntity locations(@PathVariable("pseudonym") String pseudonym) {
         try {
-            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            Driver driver = driverDatabaseTable.findById(pseudonym);
             List<Location> locations = locationDatabaseTable.findAllLocationsFor(driver);
             return ResponseEntity.ok(locations);
         } catch (NullPointerException | IllegalArgumentException exception) {
@@ -113,7 +113,7 @@ public class LocationController {
             @Valid @RequestBody LocationDto data
     ) {
         try {
-            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            Driver driver = driverDatabaseTable.findById(pseudonym);
             locationDatabaseTable.updateLocationFor(driver, identifier, data);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         } catch (NullPointerException | IllegalArgumentException e) {
@@ -139,7 +139,7 @@ public class LocationController {
             @PathVariable("identifier") String identifier
     ) {
         try {
-            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            Driver driver = driverDatabaseTable.findById(pseudonym);
             locationDatabaseTable.deleteLocationFor(driver, identifier);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         } catch (NullPointerException | IllegalArgumentException e) {

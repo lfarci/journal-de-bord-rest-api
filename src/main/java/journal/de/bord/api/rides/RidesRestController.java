@@ -49,7 +49,7 @@ public class RidesRestController {
             @Valid @RequestBody StopDto departure
     ) {
         try {
-            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            Driver driver = driverDatabaseTable.findById(pseudonym);
             rideDatabaseTable.start(driver, departure);
             return new ResponseEntity(HttpStatus.CREATED);
         } catch (IllegalStateException exception) {
@@ -73,7 +73,7 @@ public class RidesRestController {
             @RequestParam("last") Optional<Boolean> last
     ) {
         try {
-            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            Driver driver = driverDatabaseTable.findById(pseudonym);
             List<Ride> rides = rideDatabaseTable.getAllDriverRides(driver, last);
             return ResponseEntity.ok(rides);
         } catch (NullPointerException | IllegalArgumentException exception) {
