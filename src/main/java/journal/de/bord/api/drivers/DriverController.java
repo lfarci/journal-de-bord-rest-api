@@ -3,10 +3,12 @@ package journal.de.bord.api.drivers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 /**
  * The controller handle the REST interface exposing the drivers resources.
@@ -51,9 +53,17 @@ public class DriverController {
      * could not be found.
      */
     @GetMapping(path = DRIVER_RESOURCE_PATH)
-    public ResponseEntity driver(@PathVariable("identifier") String identifier) {
+    public ResponseEntity driver(
+            Authentication authentication,
+            @PathVariable("identifier") String identifier
+    ) {
         try {
-            return ResponseEntity.ok(driverService.findById(identifier));
+            String userId = authentication.getName();
+            if (userId.equals(identifier)) {
+                return ResponseEntity.ok(driverService.findById(identifier));
+            } else {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Restricted to the owner.");
+            }
         } catch (NullPointerException | IllegalArgumentException exception) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, exception.getMessage());
         }
