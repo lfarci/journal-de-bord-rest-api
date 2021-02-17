@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
-import java.security.Principal;
 
 /**
  * The controller handle the REST interface exposing the drivers resources.
@@ -122,8 +121,15 @@ public class DriverController {
      * stop (409).
      */
     @DeleteMapping(path = DRIVER_RESOURCE_PATH)
-    public ResponseEntity delete(@PathVariable("identifier") String identifier) {
+    public ResponseEntity delete(
+            Authentication authentication,
+            @PathVariable("identifier") String identifier
+    ) {
         try {
+            String userId = authentication.getName();
+            if (!userId.equals(identifier)) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Restricted to the owner.");
+            }
             driverService.deleteById(identifier);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         } catch (NullPointerException | IllegalArgumentException e) {
