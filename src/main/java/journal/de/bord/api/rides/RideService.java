@@ -1,9 +1,7 @@
-package journal.de.bord.api.services;
+package journal.de.bord.api.rides;
 
-import journal.de.bord.api.dto.RideDto;
-import journal.de.bord.api.dto.StopDto;
-import journal.de.bord.api.entities.Driver;
-import journal.de.bord.api.entities.Ride;
+import journal.de.bord.api.stops.StopDto;
+import journal.de.bord.api.drivers.Driver;
 
 import java.util.List;
 import java.util.Optional;

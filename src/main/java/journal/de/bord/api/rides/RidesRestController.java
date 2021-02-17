@@ -1,12 +1,8 @@
-package journal.de.bord.api.controllers;
+package journal.de.bord.api.rides;
 
-import journal.de.bord.api.dto.RideDto;
-import journal.de.bord.api.dto.StopDto;
-import journal.de.bord.api.entities.Driver;
-import journal.de.bord.api.entities.Ride;
-import journal.de.bord.api.repositories.DriverRepository;
-import journal.de.bord.api.services.DriverDatabaseTable;
-import journal.de.bord.api.services.RideDatabaseTable;
+import journal.de.bord.api.stops.StopDto;
+import journal.de.bord.api.drivers.Driver;
+import journal.de.bord.api.drivers.DriverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +23,7 @@ public class RidesRestController {
     private static final String RIDE_RESOURCE_PATH = "/api/drivers/{pseudonym}/rides/{identifier}";
 
     @Autowired
-    private DriverDatabaseTable driverDatabaseTable;
+    private DriverService driverService;
 
     @Autowired
     private RideDatabaseTable rideDatabaseTable;
@@ -53,7 +49,7 @@ public class RidesRestController {
             @Valid @RequestBody StopDto departure
     ) {
         try {
-            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            Driver driver = driverService.findById(pseudonym);
             rideDatabaseTable.start(driver, departure);
             return new ResponseEntity(HttpStatus.CREATED);
         } catch (IllegalStateException exception) {
@@ -77,7 +73,7 @@ public class RidesRestController {
             @RequestParam("last") Optional<Boolean> last
     ) {
         try {
-            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            Driver driver = driverService.findById(pseudonym);
             List<Ride> rides = rideDatabaseTable.getAllDriverRides(driver, last);
             return ResponseEntity.ok(rides);
         } catch (NullPointerException | IllegalArgumentException exception) {

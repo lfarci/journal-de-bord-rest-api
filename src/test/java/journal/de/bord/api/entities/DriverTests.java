@@ -1,5 +1,9 @@
 package journal.de.bord.api.entities;
 
+import journal.de.bord.api.drivers.Driver;
+import journal.de.bord.api.locations.Location;
+import journal.de.bord.api.rides.Ride;
+import journal.de.bord.api.stops.Stop;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -20,7 +24,7 @@ public class DriverTests {
     @Test
     public void driverCanStartWithoutPastRides() {
         List<Ride> rides = new ArrayList<>();
-        Driver driver = new Driver("pseudonym", 1000L, rides, new ArrayList<>());
+        Driver driver = new Driver("pseudonym", 1000L, rides, new ArrayList<>(), new ArrayList<>());
         assertThat(driver.canStartWith(new Stop())).isTrue();
     }
 
@@ -34,7 +38,7 @@ public class DriverTests {
         Stop nextStop = new Stop(nextMoment, 10100L, new Location());
         Ride ride = new Ride(departure, arrival);
         List<Ride> rides = new ArrayList<>(Arrays.asList(ride));
-        Driver driver = new Driver("pseudonym", 1000L, rides, new ArrayList<>());
+        Driver driver = new Driver("pseudonym", 1000L, rides, new ArrayList<>(), new ArrayList<>());
         assertThat(driver.canStartWith(nextStop)).isTrue();
     }
 
@@ -43,14 +47,14 @@ public class DriverTests {
         Stop departure = new Stop(LocalDateTime.now(), 10000L, new Location());
         Ride ride = new Ride(departure);
         List<Ride> rides = new ArrayList<>(Arrays.asList(ride));
-        Driver driver = new Driver("pseudonym", 1000L, rides, new ArrayList<>());
+        Driver driver = new Driver("pseudonym", 1000L, rides, new ArrayList<>(), new ArrayList<>());
         assertThat(driver.canStartWith(departure)).isFalse();
     }
 
     @Test
     public void driverCannotStartWithANullStop() {
         List<Ride> rides = new ArrayList<>();
-        Driver driver = new Driver("pseudonym", 1000L, rides, new ArrayList<>());
+        Driver driver = new Driver("pseudonym", 1000L, rides, new ArrayList<>(), new ArrayList<>());
         assertThat(driver.canStartWith(null)).isFalse();
     }
 
@@ -64,7 +68,7 @@ public class DriverTests {
         Stop arrival = new Stop(arrivalMoment, 10100L, new Location());
         Ride ride = new Ride(departure, arrival);
         List<Ride> rides = new ArrayList<>(Arrays.asList(ride));
-        Driver driver = new Driver("pseudonym", 1000L, rides, new ArrayList<>());
+        Driver driver = new Driver("pseudonym", 1000L, rides, new ArrayList<>(), new ArrayList<>());
         assertThat(driver.canStartWith(faultyStop)).isFalse();
     }
 

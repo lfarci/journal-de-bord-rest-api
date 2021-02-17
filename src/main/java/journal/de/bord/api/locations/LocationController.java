@@ -1,10 +1,7 @@
-package journal.de.bord.api.controllers;
+package journal.de.bord.api.locations;
 
-import journal.de.bord.api.dto.LocationDto;
-import journal.de.bord.api.entities.Driver;
-import journal.de.bord.api.entities.Location;
-import journal.de.bord.api.services.DriverDatabaseTable;
-import journal.de.bord.api.services.LocationDatabaseTable;
+import journal.de.bord.api.drivers.Driver;
+import journal.de.bord.api.drivers.DriverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +15,13 @@ import java.util.List;
  * The controller handle the REST interface exposing the locations resources.
  */
 @RestController
-public class LocationsRestController {
+public class LocationController {
 
     private static final String LOCATIONS_RESOURCE_PATH = "/api/drivers/{pseudonym}/locations";
     private static final String LOCATION_RESOURCE_PATH = "/api/drivers/{pseudonym}/locations/{identifier}";
 
     @Autowired
-    private DriverDatabaseTable driverDatabaseTable;
+    private DriverService driverService;
 
     @Autowired
     private LocationDatabaseTable locationDatabaseTable;
@@ -48,13 +45,13 @@ public class LocationsRestController {
             @Valid @RequestBody LocationDto location
     ) {
         try {
-            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            Driver driver = driverService.findById(pseudonym);
             locationDatabaseTable.createNewLocationFor(driver, location);
             return new ResponseEntity(HttpStatus.CREATED);
-        } catch (NullPointerException | IllegalArgumentException exception) {
+        } catch (NullPointerException | IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        } catch (IllegalStateException exception) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
+        } catch (IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
         }
     }
 
@@ -72,7 +69,7 @@ public class LocationsRestController {
             @PathVariable("identifier") String identifier
     ) {
         try {
-            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            Driver driver = driverService.findById(pseudonym);
             Location location = locationDatabaseTable.findLocationFor(driver, identifier);
             return ResponseEntity.ok(location);
         } catch (NullPointerException | IllegalArgumentException exception) {
@@ -90,7 +87,7 @@ public class LocationsRestController {
     @GetMapping(path = LOCATIONS_RESOURCE_PATH)
     public ResponseEntity locations(@PathVariable("pseudonym") String pseudonym) {
         try {
-            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            Driver driver = driverService.findById(pseudonym);
             List<Location> locations = locationDatabaseTable.findAllLocationsFor(driver);
             return ResponseEntity.ok(locations);
         } catch (NullPointerException | IllegalArgumentException exception) {
@@ -105,7 +102,9 @@ public class LocationsRestController {
      * @param identifier is the location id.
      * @param data is the data of the new location.
      * @return the response without content (204).
-     * @throws ResponseStatusException if the identifier or the data is not valid.
+     * @throws ResponseStatusException when the identifier or the driver is
+     * unknown (404). Or when the body contains a valid location with a name
+     * that already exist (409).
      */
     @PutMapping(path = LOCATION_RESOURCE_PATH)
     public ResponseEntity update(
@@ -114,11 +113,13 @@ public class LocationsRestController {
             @Valid @RequestBody LocationDto data
     ) {
         try {
-            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            Driver driver = driverService.findById(pseudonym);
             locationDatabaseTable.updateLocationFor(driver, identifier, data);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
-        } catch (NullPointerException | IllegalArgumentException exception) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, exception.getMessage());
+        } catch (NullPointerException | IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
 
@@ -128,7 +129,9 @@ public class LocationsRestController {
      * @param pseudonym is the pseudonym of the driver.
      * @param identifier is the location id.
      * @return the response without content (204).
-     * @throws ResponseStatusException if the driver or the location cannot be found (404).
+     * @throws ResponseStatusException if the driver or the location cannot be
+     * found (404). Or when the location is referenced by one of the driver's
+     * stop (409).
      */
     @DeleteMapping(path = LOCATION_RESOURCE_PATH)
     public ResponseEntity delete(
@@ -136,11 +139,13 @@ public class LocationsRestController {
             @PathVariable("identifier") String identifier
     ) {
         try {
-            Driver driver = driverDatabaseTable.findByPseudonym(pseudonym);
+            Driver driver = driverService.findById(pseudonym);
             locationDatabaseTable.deleteLocationFor(driver, identifier);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         } catch (NullPointerException | IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
 

@@ -1,12 +1,9 @@
-package journal.de.bord.api.dto;
+package journal.de.bord.api.stops;
 
-import journal.de.bord.api.entities.Location;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
-import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;

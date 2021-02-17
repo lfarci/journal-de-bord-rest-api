@@ -1,7 +1,9 @@
-package journal.de.bord.api.entities;
+package journal.de.bord.api.drivers;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import journal.de.bord.api.locations.Location;
+import journal.de.bord.api.rides.Ride;
+import journal.de.bord.api.stops.Stop;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +12,9 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +31,7 @@ public class Driver {
     }
 
     @Id
-    private String pseudonym;
+    private String identifier;
 
     @NotNull
     @Min(0)
@@ -41,15 +45,32 @@ public class Driver {
     @JsonIgnore
     private List<Location> locations;
 
+    @OneToMany(mappedBy = "driver")
+    @JsonIgnore
+    private List<Stop> stops;
+
+    /**
+     * Initializes a new driver. This should be used during the driver's
+     * creation.
+     *
+     * @param identifier is a new identifier.
+     * @param objective is the new driver's kilometers objective.
+     */
+    public Driver(@NotNull @NotBlank String identifier, @NotNull Long objective) {
+        this(identifier, objective, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+    }
+
     public Boolean hasDriven() {
         return !rides.isEmpty();
     }
 
+    @JsonIgnore
     public Boolean isDriving() {
         Optional<Ride> lastDrive = Driver.getLastRide(rides);
         return lastDrive.isPresent() && !lastDrive.get().isDone();
     }
 
+    @JsonIgnore
     public Optional<Ride> getLastRide() {
         return Driver.getLastRide(rides);
     }
@@ -80,6 +101,13 @@ public class Driver {
     public Location getLocationById(Long identifier) {
         List<Location> results = locations.stream()
                 .filter(l -> l.getId().equals(identifier))
+                .collect(Collectors.toList());
+        return results.isEmpty() ? null : results.get(0);
+    }
+
+    public Stop getStopById(Long identifier) {
+        List<Stop> results = stops.stream()
+                .filter(s -> s.getId().equals(identifier))
                 .collect(Collectors.toList());
         return results.isEmpty() ? null : results.get(0);
     }

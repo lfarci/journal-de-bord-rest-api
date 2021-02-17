@@ -1,9 +1,7 @@
-package journal.de.bord.api.repositories;
+package journal.de.bord.api.locations;
 
-import journal.de.bord.api.entities.Location;
+import journal.de.bord.api.locations.Location;
 import org.springframework.data.repository.CrudRepository;
-
-import java.util.Optional;
 
 public interface LocationRepository extends CrudRepository<Location, Long> {
 

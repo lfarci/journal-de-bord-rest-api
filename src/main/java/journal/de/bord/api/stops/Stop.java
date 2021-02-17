@@ -1,6 +1,9 @@
-package journal.de.bord.api.entities;
+package journal.de.bord.api.stops;
 
-import journal.de.bord.api.dto.StopDto;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import journal.de.bord.api.drivers.Driver;
+import journal.de.bord.api.locations.Location;
+import journal.de.bord.api.locations.LocationDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,17 +13,21 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 /**
  * Represents a stop made by a driver during one of his rides. For now only the ride departure and ride arrival are
  * registered.
  */
 @Entity
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"moment", "location"})})
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Stop {
+
+    public static Stop from(StopDto data, Location location) {
+        return new Stop(data.getMoment(), data.getOdometerValue(), location);
+    }
 
     /**
      * Identifies this entity.
@@ -55,6 +62,11 @@ public class Stop {
     @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "location", referencedColumnName = "id")
     private Location location;
+
+    @ManyToOne
+    @JoinColumn
+    @JsonIgnore
+    private Driver driver;
 
     public Stop(@NotNull LocalDateTime moment, @NotNull @Min(0) Long odometerValue, @Valid @NotNull Location location) {
         this.moment = moment;

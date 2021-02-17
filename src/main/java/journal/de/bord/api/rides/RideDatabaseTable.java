@@ -1,14 +1,11 @@
-package journal.de.bord.api.services;
+package journal.de.bord.api.rides;
 
-import journal.de.bord.api.dto.RideDto;
-import journal.de.bord.api.dto.StopDto;
-import journal.de.bord.api.entities.Driver;
-import journal.de.bord.api.entities.Location;
-import journal.de.bord.api.entities.Ride;
-import journal.de.bord.api.entities.Stop;
-import journal.de.bord.api.repositories.DriverRepository;
-import journal.de.bord.api.repositories.LocationRepository;
-import journal.de.bord.api.repositories.RideRepository;
+import journal.de.bord.api.stops.StopDto;
+import journal.de.bord.api.drivers.Driver;
+import journal.de.bord.api.locations.Location;
+import journal.de.bord.api.stops.Stop;
+import journal.de.bord.api.locations.LocationService;
+import journal.de.bord.api.drivers.DriverRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -71,10 +68,10 @@ public class RideDatabaseTable implements RideService {
         }
         Stop stop = fromDto(departure);
         if (!driver.canStartWith(stop)) {
-            throw new IllegalStateException(driver.getPseudonym() + " cannot start a ride.");
+            throw new IllegalStateException(driver.getIdentifier() + " cannot start a ride.");
         }
-        if (!driverRepository.existsById(driver.getPseudonym())) {
-            throw new IllegalArgumentException(driver.getPseudonym() + " doesn't exist.");
+        if (!driverRepository.existsById(driver.getIdentifier())) {
+            throw new IllegalArgumentException(driver.getIdentifier() + " doesn't exist.");
         }
         if (!locationService.existsById(stop.getLocation().getId())) {
             throw new IllegalArgumentException("The departure location doesn't exist.");
