@@ -8,30 +8,55 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
-public class DriverDatabaseTable implements DriverService {
+public class DriverService {
 
     @Autowired
     DriverRepository driverRepository;
 
-    @Override
+    /**
+     * Tells if the given identifier is the one of a driver.
+     *
+     * @param identifier is a potential driver identifier.
+     * @return true if the identifier exists.
+     * @throws NullPointerException when the identifier argument is null.
+     */
     public Boolean exist(String identifier) {
         Objects.requireNonNull(identifier, "\"identifier\" argument is null");
         return driverRepository.existsById(identifier);
     }
 
-    @Override
+    /**
+     * Finds the driver for the given identifier.
+     *
+     * @param identifier is the identifier of the driver to get.
+     * @return the driver with the given identifier.
+     * @throws NullPointerException when the identifier argument is null.
+     * @throws IllegalArgumentException when the specified driver does not
+     * exist.
+     */
     public Driver findById(String identifier) {
         Objects.requireNonNull(identifier, "\"identifier\" argument is null");
         Optional<Driver> driver = driverRepository.findById(identifier);
         return driver.orElseThrow(IllegalArgumentException::new);
     }
 
-    @Override
+    /**
+     * Finds all the drivers.
+     *
+     * @return the list of drivers.
+     */
     public Iterable<Driver> findAll() {
         return driverRepository.findAll();
     }
 
-    @Override
+    /**
+     * Creates a new driver.
+     *
+     * @param data contains the data of the new driver.
+     * @throws NullPointerException when the driver argument is null.
+     * @throws IllegalStateException when the driver's identifier is
+     * already used.
+     */
     public void create(DriverDto data) {
         Objects.requireNonNull(data, "\"data\" argument is null");
         try {
@@ -43,7 +68,12 @@ public class DriverDatabaseTable implements DriverService {
         }
     }
 
-    @Override
+    /**
+     * Updates the specified driver.
+     *
+     * @param data is the driver to update.
+     * @throws NullPointerException when the identifier argument is null.
+     */
     public void update(DriverDto data) {
         Objects.requireNonNull(data, "\"data\" argument is null");
         try {
@@ -56,7 +86,12 @@ public class DriverDatabaseTable implements DriverService {
         }
     }
 
-    @Override
+    /**
+     * Deletes the specified driver.
+     *
+     * @param identifier is the id of the driver to delete.
+     * @throws NullPointerException when the identifier argument is null.
+     */
     public void deleteById(String identifier) {
         Objects.requireNonNull(identifier, "\"identifier\" argument is null");
         if (!exist(identifier)) {

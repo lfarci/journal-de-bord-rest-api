@@ -64,11 +64,13 @@ public class Driver {
         return !rides.isEmpty();
     }
 
+    @JsonIgnore
     public Boolean isDriving() {
         Optional<Ride> lastDrive = Driver.getLastRide(rides);
         return lastDrive.isPresent() && !lastDrive.get().isDone();
     }
 
+    @JsonIgnore
     public Optional<Ride> getLastRide() {
         return Driver.getLastRide(rides);
     }

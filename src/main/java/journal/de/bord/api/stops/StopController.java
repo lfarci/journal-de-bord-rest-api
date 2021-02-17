@@ -1,7 +1,7 @@
 package journal.de.bord.api.stops;
 
 import journal.de.bord.api.drivers.Driver;
-import journal.de.bord.api.drivers.DriverDatabaseTable;
+import journal.de.bord.api.drivers.DriverService;
 import journal.de.bord.api.locations.Location;
 import journal.de.bord.api.locations.LocationDatabaseTable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class StopController {
     private static final String STOP_LOCATION_RESOURCE_PATH = "/api/drivers/{pseudonym}/stops/{identifier}/location";
 
     @Autowired
-    private DriverDatabaseTable driverDatabaseTable;
+    private DriverService driverService;
 
     @Autowired
     private StopDatabaseTable stopDatabaseTable;
@@ -51,7 +51,7 @@ public class StopController {
             @Valid @RequestBody StopDto stop
     ) {
         try {
-            Driver driver = driverDatabaseTable.findById(pseudonym);
+            Driver driver = driverService.findById(pseudonym);
             Long locationId = stop.getLocationId();
             if (locationDatabaseTable.existsById(locationId)) {
                 Location location = locationDatabaseTable.findById(locationId);
@@ -82,7 +82,7 @@ public class StopController {
             @PathVariable("identifier") String identifier
     ) {
         try {
-            Driver driver = driverDatabaseTable.findById(pseudonym);
+            Driver driver = driverService.findById(pseudonym);
             Stop stop = stopDatabaseTable.findStopFor(driver, identifier);
             return ResponseEntity.ok(stop);
         } catch (NullPointerException | IllegalArgumentException exception) {
