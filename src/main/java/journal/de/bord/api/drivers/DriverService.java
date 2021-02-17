@@ -1,60 +1,68 @@
 package journal.de.bord.api.drivers;
 
-import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
 
-public interface DriverService {
-    
-    /**
-     * Tells if the given identifier is the one of a driver.
-     *
-     * @param identifier is a potential driver identifier.
-     * @return true if the identifier exists.
-     * @throws NullPointerException when the identifier argument is null.
-     */
-    Boolean exist(String identifier);
+import java.util.Objects;
+import java.util.Optional;
 
-    /**
-     * Finds the driver for the given identifier.
-     *
-     * @param identifier is the identifier of the driver to get.
-     * @return the driver with the given identifier.
-     * @throws NullPointerException when the identifier argument is null.
-     * @throws IllegalArgumentException when the specified driver does not
-     * exist.
-     */
-    Driver findById(String identifier);
+@Service
+public class DriverDatabaseTable implements DriverService {
 
-    /**
-     * Finds all the drivers.
-     *
-     * @return the list of drivers.
-     */
-    Iterable<Driver> findAll();
+    @Autowired
+    DriverRepository driverRepository;
 
-    /**
-     * Creates a new driver.
-     *
-     * @param driver contains the data of the new driver.
-     * @throws NullPointerException when the driver argument is null.
-     * @throws IllegalStateException when the driver's identifier is
-     * already used.
-     */
-    void create(DriverDto driver);
+    @Override
+    public Boolean exist(String identifier) {
+        Objects.requireNonNull(identifier, "\"identifier\" argument is null");
+        return driverRepository.existsById(identifier);
+    }
 
-    /**
-     * Updates the specified driver.
-     * 
-     * @param driver is the driver to update.
-     * @throws NullPointerException when the identifier argument is null.
-     */
-    void update(DriverDto driver);
+    @Override
+    public Driver findById(String identifier) {
+        Objects.requireNonNull(identifier, "\"identifier\" argument is null");
+        Optional<Driver> driver = driverRepository.findById(identifier);
+        return driver.orElseThrow(IllegalArgumentException::new);
+    }
 
-    /**
-     * Deletes the specified driver.
-     *
-     * @param identifier is the id of the driver to delete.
-     * @throws NullPointerException when the identifier argument is null.
-     */
-    void deleteById(String identifier);
+    @Override
+    public Iterable<Driver> findAll() {
+        return driverRepository.findAll();
+    }
 
+    @Override
+    public void create(DriverDto data) {
+        Objects.requireNonNull(data, "\"data\" argument is null");
+        try {
+            Driver driver = new Driver(data.getIdentifier(), data.getObjective());
+            driverRepository.save(driver);
+        } catch (DataIntegrityViolationException e) {
+            String msg = String.format("Driver with id %s already exist.", data.getIdentifier());
+            throw new IllegalStateException(msg);
+        }
+    }
+
+    @Override
+    public void update(DriverDto data) {
+        Objects.requireNonNull(data, "\"data\" argument is null");
+        try {
+            Driver driver = findById(data.getIdentifier());
+            driver.setObjective(data.getObjective());
+            driverRepository.save(driver);
+        } catch (DataIntegrityViolationException e) {
+            String msg = String.format("Driver with id %s already exist.", data.getIdentifier());
+            throw new IllegalStateException(msg);
+        }
+    }
+
+    @Override
+    public void deleteById(String identifier) {
+        Objects.requireNonNull(identifier, "\"identifier\" argument is null");
+        if (!exist(identifier)) {
+            String msg = String.format("Driver with id %s does not exist.", identifier);
+            throw new IllegalArgumentException(msg);
+        }
+        driverRepository.deleteById(identifier);
+    }
 }
