@@ -3,6 +3,7 @@ package journal.de.bord.api.drivers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -18,7 +19,7 @@ public class DriverController {
     private static final String DRIVER_RESOURCE_PATH = "/api/drivers/{identifier}";
 
     @Autowired
-    private DriverDatabaseTable driverDatabaseTable;
+    private DriverService driverService;
 
     /**
      * Creates a new driver.
@@ -33,7 +34,7 @@ public class DriverController {
     @PostMapping(path = DRIVERS_RESOURCE_PATH)
     public ResponseEntity create(@Valid @RequestBody DriverDto driver) {
         try {
-            driverDatabaseTable.create(driver);
+            driverService.create(driver);
             return new ResponseEntity(HttpStatus.CREATED);
         } catch (NullPointerException e) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
@@ -46,14 +47,22 @@ public class DriverController {
      * Gets a specific driver.
      *
      * @param identifier is the identifier of the driver to get.
-     * @return the response containing the location.
+     * @return the response containing the driver.
      * @throws ResponseStatusException 404 when the specified driver identifier
      * could not be found.
      */
     @GetMapping(path = DRIVER_RESOURCE_PATH)
-    public ResponseEntity driver(@PathVariable("identifier") String identifier) {
+    public ResponseEntity driver(
+            Authentication authentication,
+            @PathVariable("identifier") String identifier
+    ) {
         try {
-            return ResponseEntity.ok(driverDatabaseTable.findById(identifier));
+            String userId = authentication.getName();
+            if (userId.equals(identifier)) {
+                return ResponseEntity.ok(driverService.findById(identifier));
+            } else {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Restricted to the owner.");
+            }
         } catch (NullPointerException | IllegalArgumentException exception) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, exception.getMessage());
         }
@@ -66,7 +75,7 @@ public class DriverController {
      */
     @GetMapping(path = DRIVERS_RESOURCE_PATH)
     public ResponseEntity drivers() {
-        return ResponseEntity.ok(driverDatabaseTable.findAll());
+        return ResponseEntity.ok(driverService.findAll());
     }
 
     /**
@@ -81,14 +90,19 @@ public class DriverController {
      */
     @PutMapping(path = DRIVER_RESOURCE_PATH)
     public ResponseEntity update(
+            Authentication authentication,
             @PathVariable("identifier") String identifier,
             @Valid @RequestBody DriverDto data
     ) {
         try {
+            String userId = authentication.getName();
+            if (!userId.equals(identifier)) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Restricted to the owner.");
+            }
             if (!identifier.equals(data.getIdentifier())) {
                 throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
             }
-            driverDatabaseTable.update(data);
+            driverService.update(data);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         } catch (NullPointerException | IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
@@ -107,9 +121,16 @@ public class DriverController {
      * stop (409).
      */
     @DeleteMapping(path = DRIVER_RESOURCE_PATH)
-    public ResponseEntity delete(@PathVariable("identifier") String identifier) {
+    public ResponseEntity delete(
+            Authentication authentication,
+            @PathVariable("identifier") String identifier
+    ) {
         try {
-            driverDatabaseTable.deleteById(identifier);
+            String userId = authentication.getName();
+            if (!userId.equals(identifier)) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Restricted to the owner.");
+            }
+            driverService.deleteById(identifier);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         } catch (NullPointerException | IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
