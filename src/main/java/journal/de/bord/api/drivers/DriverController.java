@@ -91,10 +91,15 @@ public class DriverController {
      */
     @PutMapping(path = DRIVER_RESOURCE_PATH)
     public ResponseEntity update(
+            Authentication authentication,
             @PathVariable("identifier") String identifier,
             @Valid @RequestBody DriverDto data
     ) {
         try {
+            String userId = authentication.getName();
+            if (!userId.equals(identifier)) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Restricted to the owner.");
+            }
             if (!identifier.equals(data.getIdentifier())) {
                 throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
             }
