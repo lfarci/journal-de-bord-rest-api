@@ -61,7 +61,7 @@ public class DriverController {
             if (userId.equals(identifier)) {
                 return ResponseEntity.ok(driverService.findById(identifier));
             } else {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Restricted to the owner.");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Restricted to the owner.");
             }
         } catch (NullPointerException | IllegalArgumentException exception) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, exception.getMessage());
@@ -86,7 +86,7 @@ public class DriverController {
      * @throws ResponseStatusException when the identifier or the driver is
      * unknown (404). Or when the body contains a valid driver with a name
      * that already exist (409). Or when there is a mismatch between the URI
-     * identifier and the data identifier.
+     * identifier and the data identifier (403).
      */
     @PutMapping(path = DRIVER_RESOURCE_PATH)
     public ResponseEntity update(
@@ -97,7 +97,7 @@ public class DriverController {
         try {
             String userId = authentication.getName();
             if (!userId.equals(identifier)) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Restricted to the owner.");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Restricted to the owner.");
             }
             if (!identifier.equals(data.getIdentifier())) {
                 throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
@@ -118,7 +118,8 @@ public class DriverController {
      * @return the response without content (204).
      * @throws ResponseStatusException if the driver or the location cannot be
      * found (404). Or when the location is referenced by one of the driver's
-     * stop (409).
+     * stop (409). Or when there is a mismatch between the URI identifier and
+     * the data identifier (403).
      */
     @DeleteMapping(path = DRIVER_RESOURCE_PATH)
     public ResponseEntity delete(
@@ -128,7 +129,7 @@ public class DriverController {
         try {
             String userId = authentication.getName();
             if (!userId.equals(identifier)) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Restricted to the owner.");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Restricted to the owner.");
             }
             driverService.deleteById(identifier);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
