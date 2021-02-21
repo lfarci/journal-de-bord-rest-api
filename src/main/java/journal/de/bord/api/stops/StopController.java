@@ -20,10 +20,6 @@ import javax.validation.Valid;
 @RequestMapping("/api/drivers/{driverId}")
 public class StopController {
 
-    private static final String STOPS_RESOURCE_PATH = "/api/drivers/{pseudonym}/stops";
-    private static final String STOP_RESOURCE_PATH = "/api/drivers/{pseudonym}/stops/{identifier}";
-    private static final String STOP_LOCATION_RESOURCE_PATH = "/api/drivers/{pseudonym}/stops/{identifier}/location";
-
     @Autowired
     private DriverService driverService;
 
@@ -51,8 +47,10 @@ public class StopController {
             Driver driver = driverService.findById(driverId);
             if (locationService.existsById(stop.getLocationId())) {
                 Location location = locationService.findById(stop.getLocationId());
-                stopService.createNewStopFor(driver, stop, location);
-                return new ResponseEntity(HttpStatus.CREATED);
+                Long id = stopService.createNewStopFor(driver, stop, location);
+                return new ResponseEntity(new Object() {
+                    public final Long stopId = id;
+                }, HttpStatus.CREATED);
             } else {
                 throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
             }
@@ -120,7 +118,7 @@ public class StopController {
      * @throws ResponseStatusException when the driver or the stop id do not
      * exist (404). Or when the provided location id is not found (422).
      */
-    @PutMapping(path = STOP_RESOURCE_PATH)
+    @PutMapping(path = "/stops/{identifier}")
     public ResponseEntity update(
             Authentication user,
             @PathVariable("driverId") String driverId,
@@ -153,7 +151,7 @@ public class StopController {
      * @throws ResponseStatusException if the driver or the location cannot be
      * found (404).
      */
-    @DeleteMapping(path = STOP_RESOURCE_PATH)
+    @DeleteMapping(path = "/stops/{identifier}")
     public ResponseEntity delete(
             Authentication user,
             @PathVariable("driverId") String driverId,

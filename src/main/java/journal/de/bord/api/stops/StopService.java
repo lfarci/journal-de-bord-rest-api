@@ -33,14 +33,15 @@ public class StopService {
         return driver.getStops();
     }
 
-    public void createNewStopFor(Driver driver, StopDto data, Location location) {
+    public Long createNewStopFor(Driver driver, StopDto data, Location location) {
         Objects.requireNonNull(driver, "\"driver\" argument is null");
         Objects.requireNonNull(data, "\"data\" argument is null");
         Objects.requireNonNull(location, "\"location\" argument is null");
         try {
             Stop stop = Stop.from(data, location);
             stop.setDriver(driver);
-            stopRepository.save(stop);
+            Stop saved = stopRepository.save(stop);
+            return saved.getId();
         } catch (NonTransientDataAccessException e) {
             throw new IllegalStateException();
         }
