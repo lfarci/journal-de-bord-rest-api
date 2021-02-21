@@ -93,17 +93,16 @@ public class DriverController {
      */
     @PutMapping(path = DRIVER_RESOURCE_PATH)
     public ResponseEntity update(
-            Authentication authentication,
+            Authentication user,
             @PathVariable("identifier") String identifier,
             @Valid @RequestBody DriverDto data
     ) {
         try {
-            String userId = authentication.getName();
-            if (!userId.equals(identifier)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Restricted to the owner.");
-            }
-            if (!identifier.equals(data.getIdentifier())) {
+            if (data.hasIdentifier() && !isOwner(user.getName(), data)) {
                 throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
+            }
+            if (!identifier.equals(user.getName())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN);
             }
             driverService.update(data);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
@@ -126,13 +125,12 @@ public class DriverController {
      */
     @DeleteMapping(path = DRIVER_RESOURCE_PATH)
     public ResponseEntity delete(
-            Authentication authentication,
+            Authentication user,
             @PathVariable("identifier") String identifier
     ) {
         try {
-            String userId = authentication.getName();
-            if (!userId.equals(identifier)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Restricted to the owner.");
+            if (!identifier.equals(user.getName())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN);
             }
             driverService.deleteById(identifier);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
