@@ -22,22 +22,25 @@ public class DriverController {
     private DriverService driverService;
 
     /**
-     * Creates a new driver.
+     * Creates a new driver. When the driver cannot be created one the
+     * following status code are thrown.
      *
-     * @param driver is the pseudonym of the driver to create a new location
-     * for.
-     * @return the response without content (created status, 201).
-     * @throws ResponseStatusException when the driver identifier already
-     * exists (409). Or when the provided data results in a null pointer
-     * exception (422).
+     * @param data is the new driver's data.
+     * @return created status (201).
+     * @throws ResponseStatusException when the driver could not be created.
      */
     @PostMapping(path = DRIVERS_RESOURCE_PATH)
-    public ResponseEntity create(@Valid @RequestBody DriverDto driver) {
+    public ResponseEntity create(
+            Authentication user,
+            @Valid @RequestBody DriverDto data
+    ) {
         try {
-            driverService.create(driver);
+            if (data.hasIdentifier() && !isOwner(user.getName(), data)) {
+                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
+            }
+            data.setIdentifier(user.getName());
+            driverService.create(data);
             return new ResponseEntity(HttpStatus.CREATED);
-        } catch (NullPointerException e) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
         } catch (IllegalStateException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
@@ -90,17 +93,16 @@ public class DriverController {
      */
     @PutMapping(path = DRIVER_RESOURCE_PATH)
     public ResponseEntity update(
-            Authentication authentication,
+            Authentication user,
             @PathVariable("identifier") String identifier,
             @Valid @RequestBody DriverDto data
     ) {
         try {
-            String userId = authentication.getName();
-            if (!userId.equals(identifier)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Restricted to the owner.");
-            }
-            if (!identifier.equals(data.getIdentifier())) {
+            if (data.hasIdentifier() && !isOwner(user.getName(), data)) {
                 throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
+            }
+            if (!identifier.equals(user.getName())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN);
             }
             driverService.update(data);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
@@ -123,19 +125,23 @@ public class DriverController {
      */
     @DeleteMapping(path = DRIVER_RESOURCE_PATH)
     public ResponseEntity delete(
-            Authentication authentication,
+            Authentication user,
             @PathVariable("identifier") String identifier
     ) {
         try {
-            String userId = authentication.getName();
-            if (!userId.equals(identifier)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Restricted to the owner.");
+            if (!identifier.equals(user.getName())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN);
             }
             driverService.deleteById(identifier);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         } catch (NullPointerException | IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
+    }
+
+    private static boolean isOwner(String authenticated, DriverDto submitted) {
+        return authenticated != null
+                && authenticated.equals(submitted.getIdentifier());
     }
 
 }
