@@ -1,10 +1,10 @@
 package journal.de.bord.api.rides;
 
+import journal.de.bord.api.locations.LocationService;
 import journal.de.bord.api.stops.StopDto;
 import journal.de.bord.api.drivers.Driver;
 import journal.de.bord.api.locations.Location;
 import journal.de.bord.api.stops.Stop;
-import journal.de.bord.api.locations.LocationService;
 import journal.de.bord.api.drivers.DriverRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -3,7 +3,7 @@ package journal.de.bord.api.stops;
 import journal.de.bord.api.drivers.Driver;
 import journal.de.bord.api.drivers.DriverService;
 import journal.de.bord.api.locations.Location;
-import journal.de.bord.api.locations.LocationDatabaseTable;
+import journal.de.bord.api.locations.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +29,7 @@ public class StopController {
     private StopDatabaseTable stopDatabaseTable;
 
     @Autowired
-    private LocationDatabaseTable locationDatabaseTable;
+    private LocationService locationService;
 
     /**
      * Creates a new stop for the specified driver.
@@ -53,8 +53,8 @@ public class StopController {
         try {
             Driver driver = driverService.findById(pseudonym);
             Long locationId = stop.getLocationId();
-            if (locationDatabaseTable.existsById(locationId)) {
-                Location location = locationDatabaseTable.findById(locationId);
+            if (locationService.existsById(locationId)) {
+                Location location = locationService.findById(locationId);
                 stopDatabaseTable.createNewStopFor(driver, stop, location);
                 return new ResponseEntity(HttpStatus.CREATED);
             } else {
