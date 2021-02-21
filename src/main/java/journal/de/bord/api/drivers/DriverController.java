@@ -10,7 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.validation.Valid;
 
 /**
- * The controller handle the REST interface exposing the drivers resources.
+ * The controller handles the REST interface exposing the drivers resources.
  */
 @RestController
 public class DriverController {
