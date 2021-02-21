@@ -7,6 +7,7 @@ import journal.de.bord.api.locations.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -16,6 +17,7 @@ import javax.validation.Valid;
  * The controller handle the REST interface exposing the stops resources.
  */
 @RestController
+@RequestMapping("/api/drivers/{driverId}")
 public class StopController {
 
     private static final String STOPS_RESOURCE_PATH = "/api/drivers/{pseudonym}/stops";
@@ -26,7 +28,7 @@ public class StopController {
     private DriverService driverService;
 
     @Autowired
-    private StopDatabaseTable stopDatabaseTable;
+    private StopService stopService;
 
     @Autowired
     private LocationService locationService;
@@ -34,28 +36,22 @@ public class StopController {
     /**
      * Creates a new stop for the specified driver.
      *
-     * The request body content is of JSON type and has the following fields:
-     * - "moment": an ISO data string.
-     * - "locationId": the id of the location the stop took place at.
-     * - "odometerValue": is the vehicle odometer value at the stop.
-     *
-     * @param pseudonym is the pseudonym of the driver to create a new stop for.
+     * @param driverId is the identifier of the driver to create a new stop for.
      * @return the response without content (created status, 201).
-     * @throws ResponseStatusException when the driver does not exist (404). Or
-     * when the provided location id is not found (422). Or when one of the
-     * driver stop has already taken place at the given location and moment.
+     * @throws ResponseStatusException when the stop cannot be created.
      */
-    @PostMapping(path = STOPS_RESOURCE_PATH)
+    @PostMapping(path = "/stops")
     public ResponseEntity create(
-            @PathVariable("pseudonym") String pseudonym,
+            Authentication user,
+            @PathVariable("driverId") String driverId,
             @Valid @RequestBody StopDto stop
     ) {
         try {
-            Driver driver = driverService.findById(pseudonym);
-            Long locationId = stop.getLocationId();
-            if (locationService.existsById(locationId)) {
-                Location location = locationService.findById(locationId);
-                stopDatabaseTable.createNewStopFor(driver, stop, location);
+            requireAuthenticatedOwner(user.getName(), driverId);
+            Driver driver = driverService.findById(driverId);
+            if (locationService.existsById(stop.getLocationId())) {
+                Location location = locationService.findById(stop.getLocationId());
+                stopService.createNewStopFor(driver, stop, location);
                 return new ResponseEntity(HttpStatus.CREATED);
             } else {
                 throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
@@ -63,27 +59,29 @@ public class StopController {
         } catch (NullPointerException | IllegalArgumentException exception) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         } catch (IllegalStateException exception) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
+            throw new ResponseStatusException(HttpStatus.CONFLICT, exception.getMessage());
         }
     }
 
     /**
      * Gets a specific user's stop.
      *
-     * @param pseudonym is the pseudonym of the driver to get the stop for.
+     * @param driverId is the identifier of the driver to get the stop for.
      * @param identifier is the stop id.
      * @return the response containing the location (JSON).
      * @throws ResponseStatusException 404 the specified driver or stop id does
      * not exist.
      */
-    @GetMapping(path = STOP_RESOURCE_PATH)
+    @GetMapping(path = "/stops/{identifier}")
     public ResponseEntity stop(
-            @PathVariable("pseudonym") String pseudonym,
+            Authentication user,
+            @PathVariable("driverId") String driverId,
             @PathVariable("identifier") String identifier
     ) {
         try {
-            Driver driver = driverService.findById(pseudonym);
-            Stop stop = stopDatabaseTable.findStopFor(driver, identifier);
+            requireAuthenticatedOwner(user.getName(), driverId);
+            Driver driver = driverService.findById(driverId);
+            Stop stop = stopService.findStopFor(driver, identifier);
             return ResponseEntity.ok(stop);
         } catch (NullPointerException | IllegalArgumentException exception) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, exception.getMessage());
@@ -93,23 +91,29 @@ public class StopController {
     /**
      * Gets all the stops that a driver has made.
      *
-     * @param pseudonym is the pseudonym of the driver to get the stops for.
+     * @param driverId is the identifier of the driver to get the stops for.
      * @return the response containing a list of stops.
      * @throws ResponseStatusException 404 the specified driver does not exist.
      */
-    @GetMapping(path = STOPS_RESOURCE_PATH)
-    public ResponseEntity locations(@PathVariable("pseudonym") String pseudonym) {
+    @GetMapping(path = "/stops")
+    public ResponseEntity stops(
+            Authentication user,
+            @PathVariable("driverId") String driverId
+    ) {
         try {
-            return ResponseEntity.ok("Get all stops endpoint");
-        } catch (NullPointerException | IllegalArgumentException exception) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, exception.getMessage());
+            requireAuthenticatedOwner(user.getName(), driverId);
+            Driver driver = driverService.findById(driverId);
+            return ResponseEntity.ok(stopService.findAllStopsFor(driver));
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
+
     }
 
     /**
-     * Replaces the specified stop with the given one.
+     * Updates the specified stop with the given one.
      *
-     * @param pseudonym is the pseudonym of the driver.
+     * @param driverId is the identifier of the driver.
      * @param identifier is the stop id.
      * @param data is the data of the new stop.
      * @return the response without content (204).
@@ -118,12 +122,21 @@ public class StopController {
      */
     @PutMapping(path = STOP_RESOURCE_PATH)
     public ResponseEntity update(
-            @PathVariable("pseudonym") String pseudonym,
+            Authentication user,
+            @PathVariable("driverId") String driverId,
             @PathVariable("identifier") String identifier,
             @Valid @RequestBody StopDto data
     ) {
         try {
-            return ResponseEntity.ok("Update stop endpoint.");
+            requireAuthenticatedOwner(user.getName(), driverId);
+            Driver driver = driverService.findById(driverId);
+            if (locationService.existsById(data.getLocationId())) {
+                Location location = locationService.findById(data.getLocationId());
+                stopService.updateStopFor(identifier, driver, data, location);
+                return new ResponseEntity(HttpStatus.NO_CONTENT);
+            } else {
+                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
+            }
         } catch (NullPointerException | IllegalArgumentException exception) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, exception.getMessage());
         } catch (IllegalStateException exception) {
@@ -134,7 +147,7 @@ public class StopController {
     /**
      * Deletes the specified stop.
      *
-     * @param pseudonym is the pseudonym of the driver.
+     * @param driverId is the identifier of the driver.
      * @param identifier is the stop id.
      * @return the response without content (204).
      * @throws ResponseStatusException if the driver or the location cannot be
@@ -142,13 +155,23 @@ public class StopController {
      */
     @DeleteMapping(path = STOP_RESOURCE_PATH)
     public ResponseEntity delete(
-            @PathVariable("pseudonym") String pseudonym,
+            Authentication user,
+            @PathVariable("driverId") String driverId,
             @PathVariable("identifier") String identifier
     ) {
         try {
-            return ResponseEntity.ok("Delete stop with id: " + identifier);
+            requireAuthenticatedOwner(user.getName(), driverId);
+            Driver driver = driverService.findById(driverId);
+            stopService.deleteStopFor(driver, identifier);
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
         } catch (NullPointerException | IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    private static void requireAuthenticatedOwner(String authenticated, String requested) {
+        if (!authenticated.equals(requested)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
     }
 

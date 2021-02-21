@@ -79,7 +79,6 @@ public class LocationService {
             );
             throw new IllegalStateException(message);
         }
-
     }
 
     public void deleteLocationFor(Driver driver, String identifier) {
@@ -95,6 +94,5 @@ public class LocationService {
             );
             throw new IllegalStateException(message);
         }
-
     }
 }

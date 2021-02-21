@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
  * registered.
  */
 @Entity
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"moment", "location"})})
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -83,6 +82,12 @@ public class Stop {
      */
     public Boolean isAfter(Stop stop) {
         return stop != null && this.moment.isAfter(stop.moment);
+    }
+
+    public void setValues(StopDto data, Location location) {
+        setMoment(data.getMoment());
+        setOdometerValue(data.getOdometerValue());
+        setLocation(location);
     }
 
 }

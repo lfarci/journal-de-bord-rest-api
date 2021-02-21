@@ -19,8 +19,6 @@ import java.util.List;
 @RequestMapping("/api/drivers/{driverId}")
 public class LocationController {
 
-    private static final String LOCATION_RESOURCE_PATH = "/api/drivers/{pseudonym}/locations/{identifier}";
-
     @Autowired
     private DriverService driverService;
 
@@ -35,7 +33,7 @@ public class LocationController {
      * @throws ResponseStatusException when the location cannot be created.
      */
     @PostMapping(path = "/locations")
-    public ResponseEntity<Long> create(
+    public ResponseEntity<Object> create(
             Authentication user,
             @PathVariable("driverId") String driverId,
             @Valid @RequestBody LocationDto location
