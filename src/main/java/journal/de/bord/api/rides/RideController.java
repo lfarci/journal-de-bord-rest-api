@@ -144,7 +144,8 @@ public class RideController {
      * @param driverId is the pseudonym of the driver.
      * @param identifier is the ride id.
      * @return the response without content (204).
-     * @throws ResponseStatusException if the driver or the ride cannot be found (404).
+     * @throws ResponseStatusException if the driver or the ride cannot be
+     * found (404).
      */
     @DeleteMapping(path = "/rides/{identifier}")
     public ResponseEntity delete(
@@ -152,12 +153,14 @@ public class RideController {
         @PathVariable("driverId") String driverId,
         @PathVariable("identifier") String identifier
     ) {
-        return ResponseEntity.ok(String.format(
-            "Delete ride with id %s for driver with id %s (user: %s).",
-            identifier,
-            driverId,
-            user.getName()
-        ));
+        try {
+            requireAuthenticatedOwner(user.getName(), driverId);
+            Driver driver = driverService.findById(driverId);
+            rideService.deleteRideFor(driver, identifier);
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        } catch (NullPointerException | IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
     }
 
     private static void requireAuthenticatedOwner(String authenticated, String requested) {

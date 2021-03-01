@@ -7,6 +7,7 @@ import journal.de.bord.api.locations.Location;
 import journal.de.bord.api.stops.Stop;
 import journal.de.bord.api.drivers.DriverRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -75,18 +76,29 @@ public class RideService {
         }
     }
 
-    public void start(Driver driver, StopDto departure) {
-        Objects.requireNonNull(driver, "\"driver\" argument is null.");
-        Objects.requireNonNull(driver, "\"stop\" argument is null.");
-    }
-
-    public void update(String identifier, RideDto data) {
-        Objects.requireNonNull(identifier, "\"identifier\" argument is null.");
-        Objects.requireNonNull(data, "\"data\" argument is null.");
-    }
-
-    public void deleteById(String rideId) {
-        Objects.requireNonNull(rideId, "\"rideId\" argument is null.");
+    /**
+     * Deletes the specified ride owned by the given driver.
+     *
+     * @param rideId is the ride id of the entity to be deleted.
+     * @throws NullPointerException when the rideId is null.
+     * @throws IllegalArgumentException when the specified driver does not
+     * exist or the ride id doesn't match any records.
+     * @throws NumberFormatException if the string does not contain a parsable long.
+     */
+    public void deleteRideFor(Driver driver, String identifier) {
+        Objects.requireNonNull(driver, "\"driver\" argument is null");
+        Objects.requireNonNull(identifier, "\"identifier\" argument is null");
+        try {
+            Ride ride = driver.getRideById(Long.parseLong(identifier));
+            if (ride == null) {
+                throw new IllegalArgumentException("Not found: " + identifier);
+            }
+            rideRepository.delete(ride);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalStateException();
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid identifier: " + identifier);
+        }
     }
 
 }
