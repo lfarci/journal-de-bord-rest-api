@@ -89,9 +89,6 @@ public class RideDatabaseTable implements RideService {
             throw new IllegalStateException("Trying to update a ride with invalid data");
         }
         Ride ride = findById(identifier);
-        if (!ride.isDriver(data.getDriverPseudonym())) {
-            throw new IllegalArgumentException("Driver mismatch");
-        }
         updateRide(ride, data);
         rideRepository.save(ride);
     }
@@ -119,10 +116,6 @@ public class RideDatabaseTable implements RideService {
     }
 
     private void updateRide(Ride ride, RideDto data) {
-        ride.setDeparture(fromDto(data.getDeparture()));
-        ride.setArrival(fromDto(data.getArrival()));
-        ride.setTrafficCondition(data.getTrafficCondition());
-        ride.setComment(data.getComment());
     }
 
 }
