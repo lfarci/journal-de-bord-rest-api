@@ -1,8 +1,10 @@
 package journal.de.bord.api.rides;
 
-import journal.de.bord.api.stops.StopDto;
 import journal.de.bord.api.drivers.Driver;
 import journal.de.bord.api.drivers.DriverService;
+import journal.de.bord.api.locations.Location;
+import journal.de.bord.api.stops.Stop;
+import journal.de.bord.api.stops.StopService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,8 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * The controller handle the REST interface exposing the rides resources.
@@ -28,7 +28,10 @@ public class RideController {
     private DriverService driverService;
 
     @Autowired
-    private RideDatabaseTable rideDatabaseTable;
+    private RideService rideService;
+
+    @Autowired
+    private StopService stopService;
 
     /**
      * Creates a new ride.
@@ -45,11 +48,25 @@ public class RideController {
         @PathVariable("driverId") String driverId,
         @Valid @RequestBody RideDto data
     ) {
-        return ResponseEntity.ok(String.format(
-            "Create ride for driver with id %s (user: %s).",
-            driverId,
-            user.getName()
-        ));
+        try {
+            requireAuthenticatedOwner(user.getName(), driverId);
+            if (data.getDeparture() == data.getArrival()) {
+                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
+            }
+            Driver driver = driverService.findById(driverId);
+            if (stopService.containsRideStops(data)) {
+                Long id = rideService.save(driver, stopService.makeRide(data));
+                return new ResponseEntity(new Object() {
+                    public final Long rideId = id;
+                }, HttpStatus.CREATED);
+            } else {
+                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
+            }
+        } catch (NullPointerException | IllegalArgumentException exception) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        } catch (IllegalStateException exception) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, exception.getMessage());
+        }
     }
 
     /**
@@ -60,17 +77,19 @@ public class RideController {
      * @throws ResponseStatusException 404 the specified driver does not exist.
      */
     @GetMapping(path = "/rides/{identifier}")
-    public ResponseEntity rides(
+    public ResponseEntity ride(
         Authentication user,
         @PathVariable("driverId") String driverId,
         @PathVariable("identifier") String identifier
     ) {
-        return ResponseEntity.ok(String.format(
-            "Get ride with id %s for driver with id %s (user: %s).",
-            identifier,
-            driverId,
-            user.getName()
-        ));
+        try {
+            requireAuthenticatedOwner(user.getName(), driverId);
+            Driver driver = driverService.findById(driverId);
+            Ride ride = rideService.findRideFor(driver, identifier);
+            return ResponseEntity.ok(ride);
+        } catch (NullPointerException | IllegalArgumentException exception) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, exception.getMessage());
+        }
     }
 
     /**
@@ -85,11 +104,13 @@ public class RideController {
         Authentication user,
         @PathVariable("driverId") String driverId
     ) {
-        return ResponseEntity.ok(String.format(
-            "Get all rides for driver with id %s (user: %s).",
-            driverId,
-            user.getName()
-        ));
+        try {
+            requireAuthenticatedOwner(user.getName(), driverId);
+            Driver driver = driverService.findById(driverId);
+            return ResponseEntity.ok(rideService.findAllRidesFor(driver));
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 
     /**
@@ -137,6 +158,12 @@ public class RideController {
             driverId,
             user.getName()
         ));
+    }
+
+    private static void requireAuthenticatedOwner(String authenticated, String requested) {
+        if (!authenticated.equals(requested)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
     }
 
 }

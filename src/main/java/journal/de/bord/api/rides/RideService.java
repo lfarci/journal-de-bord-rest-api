@@ -1,76 +1,92 @@
 package journal.de.bord.api.rides;
 
+import journal.de.bord.api.locations.LocationService;
 import journal.de.bord.api.stops.StopDto;
 import journal.de.bord.api.drivers.Driver;
+import journal.de.bord.api.locations.Location;
+import journal.de.bord.api.stops.Stop;
+import journal.de.bord.api.drivers.DriverRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import java.util.*;
 
-public interface RideService {
+@Service
+public class RideService {
+
+    @Autowired
+    private RideRepository rideRepository;
+
+    @Autowired
+    private DriverRepository driverRepository;
 
     /**
-     * Finds a ride by id.
+     * Finds one of the specified driver's ride by id.
      *
-     * @param id is the identifier of the ride to find.
+     * @param driver is the driver to get a ride for.
+     * @param identifier is the identifier of the ride to find.
      * @return the ride with the specified id.
-     * @throws IllegalArgumentException if the given id doesn't exist or is not a parsable long.
+     * @throws IllegalArgumentException if the given id doesn't exist or is not
+     * a parsable long.
      * @throws NullPointerException if the id is null.
      */
-    Ride findById(String id);
+    public Ride findRideFor(Driver driver, String identifier) {
+        Objects.requireNonNull(driver, "\"driver\" argument is null");
+        Objects.requireNonNull(identifier, "\"identifier\" argument is null");
+        try {
+            Ride result = driver.getRideById(Long.parseLong(identifier));
+            if (result == null) {
+                throw new IllegalArgumentException("No ride with id: " + identifier);
+            }
+            return result;
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException("The id is invalid: " + identifier);
+        }
+    }
 
     /**
-     * Gets a list of rides for the specified driver.
+     * Gets the list of rides for the specified driver.
      *
      * @param driver is the driver to get rides for.
-     * @param last if specified and true then only the last driver ride is
-     * returned.
      * @return the response containing a list of rides.
-     * @throws NullPointerException when the driver is null.
      * @throws IllegalArgumentException when the specified driver does not
      * exist.
-     * @throws IllegalStateException when trying to get the last ride for a
-     * driver who hasn't driven before.
+     * @throws NullPointerException when the driver is null.
      */
-    List<Ride> getAllDriverRides(Driver driver, Optional<Boolean> last);
+    public List<Ride> findAllRidesFor(Driver driver) {
+        Objects.requireNonNull(driver, "\"driver\" argument is null");
+        return driver.getRides();
+    }
 
-    /**
-     * Starts a new ride for the specified driver. A new ride should take place
-     * after the last finished ride. Two rides cannot be in progress at the
-     * same time.
-     *
-     * @param driver is the driver to create a new drive for.
-     * @param departure is the data describing the departure of the new ride
-     * and its driver.
-     * @throws NullPointerException when the driver or the departure argument
-     * is null.
-     * @throws IllegalArgumentException when the specified driver or stop
-     * location does not exist.
-     * @throws IllegalStateException when the driver is currently driving or
-     * when the given departure took place before the last driver arrival. Also
-     * if the departure is not valid.
-     */
-    void start(Driver driver, StopDto departure);
+    public Long save(Driver driver, Ride ride) {
+        Objects.requireNonNull(driver, "\"driver\" argument is null");
+        Objects.requireNonNull(ride, "\"ride\" argument is null");
+        try {
+            ride.setDriver(driver);
+            rideRepository.save(ride);
+            return ride.getId();
+        } catch (NonTransientDataAccessException e) {
+            throw new IllegalStateException();
+        }
+    }
 
-    /**
-     * Updates the specified ride.
-     *
-     * @param identifier is the id of the ride to update.
-     * @param ride is the updated ride.
-     * @throws NullPointerException when the ride argument is null.
-     * @throws IllegalArgumentException if the given id does not exist.
-     * @throws IllegalStateException if the ride data is not valid.
-     */
-    void update(String identifier, RideDto ride);
+    public void start(Driver driver, StopDto departure) {
+        Objects.requireNonNull(driver, "\"driver\" argument is null.");
+        Objects.requireNonNull(driver, "\"stop\" argument is null.");
+    }
 
-    /**
-     * Deletes the specified ride owned by the given driver.
-     *
-     * @param rideId is the ride id of the entity to be deleted.
-     * @throws NullPointerException when the rideId is null.
-     * @throws IllegalArgumentException when the specified driver does not
-     * exist or the ride id doesn't match any records.
-     * @throws NumberFormatException if the string does not contain a parsable long.
-     */
-    void deleteById(String rideId);
+    public void update(String identifier, RideDto data) {
+        Objects.requireNonNull(identifier, "\"identifier\" argument is null.");
+        Objects.requireNonNull(data, "\"data\" argument is null.");
+    }
+
+    public void deleteById(String rideId) {
+        Objects.requireNonNull(rideId, "\"rideId\" argument is null.");
+    }
 
 }

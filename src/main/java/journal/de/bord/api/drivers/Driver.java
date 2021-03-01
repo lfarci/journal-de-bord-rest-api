@@ -112,4 +112,11 @@ public class Driver {
         return results.isEmpty() ? null : results.get(0);
     }
 
+    public Ride getRideById(Long identifier) {
+        List<Ride> results = rides.stream()
+                .filter(s -> s.getId().equals(identifier))
+                .collect(Collectors.toList());
+        return results.isEmpty() ? null : results.get(0);
+    }
+
 }
