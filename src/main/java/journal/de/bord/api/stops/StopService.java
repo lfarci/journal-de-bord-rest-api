@@ -132,4 +132,20 @@ public class StopService {
         }
     }
 
+    public Ride updateRide(Ride ride, RideDto updatedData) {
+        try {
+            Stop departure = findRideDeparture(updatedData);
+            Stop arrival = findRideArrival(updatedData);
+            ride.setDeparture(departure);
+            ride.setArrival(arrival);
+            ride.setTrafficCondition(updatedData.getTrafficCondition());
+            ride.setComment(updatedData.getComment());
+            return ride;
+        } catch (IllegalStateException e) {
+            throw new IllegalStateException(
+                    "Could not update the ride: " + e.getMessage()
+            );
+        }
+    }
+
 }

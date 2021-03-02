@@ -11,10 +11,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.stereotype.Service;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import java.util.*;
 
 @Service
@@ -79,7 +75,6 @@ public class RideService {
     /**
      * Deletes the specified ride owned by the given driver.
      *
-     * @param rideId is the ride id of the entity to be deleted.
      * @throws NullPointerException when the rideId is null.
      * @throws IllegalArgumentException when the specified driver does not
      * exist or the ride id doesn't match any records.

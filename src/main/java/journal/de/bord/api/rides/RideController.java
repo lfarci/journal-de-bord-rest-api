@@ -130,12 +130,25 @@ public class RideController {
         @PathVariable("identifier") String identifier,
         @Valid @RequestBody RideDto data
     ) {
-        return ResponseEntity.ok(String.format(
-            "Update ride with id %s for driver with id %s (user: %s).",
-            identifier,
-            driverId,
-            user.getName()
-        ));
+        try {
+            requireAuthenticatedOwner(user.getName(), driverId);
+            if (data.getDeparture() == data.getArrival()) {
+                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
+            }
+            Driver driver = driverService.findById(driverId);
+            if (stopService.containsRideStops(data)) {
+                Ride ride = rideService.findRideFor(driver, identifier);
+                ride = stopService.updateRide(ride, data);
+                rideService.save(driver, ride);
+                return new ResponseEntity(HttpStatus.NO_CONTENT);
+            } else {
+                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
+            }
+        } catch (NullPointerException | IllegalArgumentException exception) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, exception.getMessage());
+        } catch (IllegalStateException exception) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
+        }
     }
 
     /**
