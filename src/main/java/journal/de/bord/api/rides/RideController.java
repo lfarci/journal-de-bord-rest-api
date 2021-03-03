@@ -55,7 +55,11 @@ public class RideController {
             }
             Driver driver = driverService.findById(driverId);
             if (driver.ownsRideStops(data)) {
-                Long id = rideService.save(driver, stopService.makeRide(data));
+                Ride ride = stopService.makeRide(data);
+                if (!ride.isValid()) {
+                    throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
+                }
+                Long id = rideService.save(driver, ride);
                 return new ResponseEntity(new Object() {
                     public final Long rideId = id;
                 }, HttpStatus.CREATED);
@@ -139,6 +143,9 @@ public class RideController {
             if (driver.ownsRideStops(data)) {
                 Ride ride = rideService.findRideFor(driver, identifier);
                 ride = stopService.updateRide(ride, data);
+                if (!ride.isValid()) {
+                    throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
+                }
                 rideService.save(driver, ride);
                 return new ResponseEntity(HttpStatus.NO_CONTENT);
             } else {

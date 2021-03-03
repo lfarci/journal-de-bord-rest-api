@@ -19,6 +19,14 @@ import java.time.LocalDateTime;
  * registered.
  */
 @Entity
+@Table(uniqueConstraints = {
+    @UniqueConstraint(columnNames = {
+        "moment",
+        "odometerValue",
+        "driver_identifier",
+        "location"
+    })
+})
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
