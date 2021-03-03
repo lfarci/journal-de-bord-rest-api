@@ -13,7 +13,6 @@ import javax.validation.constraints.NotNull;
  * Represents one of the location visited by a driver. A driver visits a location by stopping at it.
  */
 @Entity
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"name"})})
 @Data
 @NoArgsConstructor
 public class Location {
