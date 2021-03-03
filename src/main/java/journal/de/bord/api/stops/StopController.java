@@ -40,14 +40,14 @@ public class StopController {
     public ResponseEntity create(
             Authentication user,
             @PathVariable("driverId") String driverId,
-            @Valid @RequestBody StopDto stop
+            @Valid @RequestBody StopDto data
     ) {
         try {
             requireAuthenticatedOwner(user.getName(), driverId);
             Driver driver = driverService.findById(driverId);
-            if (locationService.existsById(stop.getLocationId())) {
-                Location location = locationService.findById(stop.getLocationId());
-                Long id = stopService.createNewStopFor(driver, stop, location);
+            if (driver.ownsLocationById(data.getLocationId())) {
+                Location location = driver.getLocationById(data.getLocationId());
+                Long id = stopService.createNewStopFor(driver, data, location);
                 return new ResponseEntity(new Object() {
                     public final Long stopId = id;
                 }, HttpStatus.CREATED);
@@ -127,8 +127,8 @@ public class StopController {
         try {
             requireAuthenticatedOwner(user.getName(), driverId);
             Driver driver = driverService.findById(driverId);
-            if (locationService.existsById(data.getLocationId())) {
-                Location location = locationService.findById(data.getLocationId());
+            if (driver.ownsLocationById(data.getLocationId())) {
+                Location location = driver.getLocationById(data.getLocationId());
                 stopService.updateStopFor(identifier, driver, data, location);
                 return new ResponseEntity(HttpStatus.NO_CONTENT);
             } else {

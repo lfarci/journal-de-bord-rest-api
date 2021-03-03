@@ -105,6 +105,10 @@ public class Driver {
         return results.isEmpty() ? null : results.get(0);
     }
 
+    public boolean ownsLocationById(Long identifier) {
+        return getLocationById(identifier) != null;
+    }
+
     public Stop getStopById(Long identifier) {
         List<Stop> results = stops.stream()
                 .filter(s -> s.getId().equals(identifier))
