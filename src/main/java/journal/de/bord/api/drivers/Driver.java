@@ -3,7 +3,9 @@ package journal.de.bord.api.drivers;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import journal.de.bord.api.locations.Location;
 import journal.de.bord.api.rides.Ride;
+import journal.de.bord.api.rides.RideDto;
 import journal.de.bord.api.stops.Stop;
+import journal.de.bord.api.stops.StopDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -114,6 +116,14 @@ public class Driver {
                 .filter(s -> s.getId().equals(identifier))
                 .collect(Collectors.toList());
         return results.isEmpty() ? null : results.get(0);
+    }
+
+    public boolean ownsStopById(Long id) {
+        return getStopById(id) != null;
+    }
+
+    public boolean ownsRideStops(RideDto ride) {
+        return ownsStopById(ride.getDeparture()) && ownsStopById(ride.getArrival());
     }
 
     public Ride getRideById(Long identifier) {
