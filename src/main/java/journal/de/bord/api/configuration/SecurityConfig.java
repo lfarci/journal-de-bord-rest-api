@@ -30,6 +30,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(corsFilter(), SessionManagementFilter.class)
                 .authorizeRequests(authorization -> authorization
                         .antMatchers(HttpMethod.GET, "/").permitAll()
+                        // This is required for the browser preflight requests.
+                        .antMatchers(HttpMethod.OPTIONS, "**").permitAll()
                         .antMatchers(HttpMethod.GET, "/api/**").hasAuthority("SCOPE_read")
                         .antMatchers(HttpMethod.POST, "/api/**").hasAuthority("SCOPE_write")
                         .antMatchers(HttpMethod.PUT, "/api/**").hasAuthority("SCOPE_write")
