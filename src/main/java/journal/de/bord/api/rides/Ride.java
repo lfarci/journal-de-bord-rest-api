@@ -15,7 +15,13 @@ import java.time.LocalDateTime;
  * specify the traffic condition and tell the system the difficulties he has encountered.
  */
 @Entity
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"departure_id", "arrival_id"})})
+@Table(uniqueConstraints = {
+    @UniqueConstraint(columnNames = {
+        "departure_id",
+        "arrival_id",
+        "driver_identifier"
+    })
+})
 @Data
 @NoArgsConstructor
 public class Ride {
@@ -100,8 +106,9 @@ public class Ride {
         return departure.getMoment();
     }
 
-    public Boolean isDriver(String pseudonym) {
-        return this.getDriver().getIdentifier().equals(pseudonym);
+    @JsonIgnore
+    public boolean isValid() {
+        return arrival.isAfter(departure)
+                && arrival.getOdometerValue() > departure.getOdometerValue();
     }
-
 }

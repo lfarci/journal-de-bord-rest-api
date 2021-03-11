@@ -2,55 +2,150 @@ package journal.de.bord.api.stops;
 
 import journal.de.bord.api.drivers.Driver;
 import journal.de.bord.api.locations.Location;
-import journal.de.bord.api.stops.Stop;
-import journal.de.bord.api.stops.StopDto;
+import journal.de.bord.api.rides.Ride;
+import journal.de.bord.api.rides.RideDto;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
-public interface StopService {
+@Service
+public class StopService {
 
-    /**
-     * Gets one of the driver Stop with the specified id.
-     *
-     * @param driver is the driver to get a Stop for.
-     * @param identifier is the Stop id.
-     * @return the Stop with the specified id.
-     */
-    Stop findStopFor(Driver driver, String identifier);
+    @Autowired
+    StopRepository stopRepository;
 
-    /**
-     * Creates a new Stop.
-     *
-     * @param driver is the Stop owner.
-     * @param stop is the new Stop.
-     * @param location is the location associated with the stop to create.
-     * @throws IllegalStateException if the new Stop name already exists.
-     * @throws NullPointerException is one of the argument is null.
-     */
-    void createNewStopFor(Driver driver, StopDto stop, Location location);
+    public boolean containsDepartureOf(RideDto ride) {
+        return stopRepository.existsById(ride.getDeparture());
+    }
 
-    /**
-     * Updates the specified Stop.
-     *
-     * @param driver is the driver that has visited the Stop.
-     * @param identifier is the id of the Stop to update.
-     * @param data is the updated Stop.
-     * @throws NullPointerException if one of the argument is null.
-     * @throws IllegalArgumentException if the given id does not exist.
-     * @throws IllegalStateException if the Stop data is not valid.
-     */
-    void updateStopFor(Driver driver, String identifier, StopDto data);
+    public boolean containsArrivalOf(RideDto ride) {
+        return ride == null || stopRepository.existsById(ride.getArrival());
+    }
 
-    /**
-     * Deletes the specified Stop.
-     *
-     * @Driver driver is the driver to delete a Stop for.
-     * @param identifier is the Stop id of the entity to be deleted.
-     * @throws NullPointerException when the identifier is null.
-     * @throws IllegalArgumentException when the specified Stop does not
-     * exist.
-     * @throws NumberFormatException if the string does not contain a parsable long.
-     */
-    void deleteStopFor(Driver driver, String identifier);
+    public Stop findStopFor(Driver driver, String identifier) {
+        try {
+            Stop result = driver.getStopById(Long.parseLong(identifier));
+            if (result == null) {
+                throw new IllegalArgumentException("No stop with id: " + identifier);
+            }
+            return result;
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException("The id is invalid: " + identifier);
+        }
+    }
+
+    public Stop findStopFor(Driver driver, Long identifier) {
+        Stop result = driver.getStopById(identifier);
+        if (result == null) {
+            throw new IllegalArgumentException("No stop with id: " + identifier);
+        }
+        return result;
+    }
+
+    public List<Stop> findAllStopsFor(Driver driver) {
+        Objects.requireNonNull(driver, "\"driver\" argument is null");
+        return driver.getStops();
+    }
+
+    public Long createNewStopFor(Driver driver, StopDto data, Location location) {
+        Objects.requireNonNull(driver, "\"driver\" argument is null");
+        Objects.requireNonNull(data, "\"data\" argument is null");
+        Objects.requireNonNull(location, "\"location\" argument is null");
+        try {
+            Stop stop = Stop.from(data, location);
+            stop.setDriver(driver);
+            Stop saved = stopRepository.save(stop);
+            return saved.getId();
+        } catch (NonTransientDataAccessException e) {
+            throw new IllegalStateException();
+        }
+    }
+
+    public void updateStopFor(String id, Driver driver, StopDto data, Location location) {
+        Objects.requireNonNull(driver, "\"driver\" argument is null");
+        Objects.requireNonNull(data, "\"data\" argument is null");
+        Objects.requireNonNull(location, "\"location\" argument is null");
+        try {
+            Stop stop = findStopFor(driver, id);
+            stop.setValues(data, location);
+            stopRepository.save(stop);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalStateException();
+        }
+    }
+
+    public void deleteStopFor(Driver driver, String identifier) {
+        Objects.requireNonNull(driver, "\"driver\" argument is null");
+        Objects.requireNonNull(identifier, "\"identifier\" argument is null");
+        try {
+            Stop stop = findStopFor(driver, identifier);
+            stopRepository.delete(stop);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalStateException();
+        }
+    }
+
+    public boolean containsRideStops(RideDto ride) {
+        return containsDepartureOf(ride) && containsArrivalOf(ride);
+    }
+
+    private Stop findRideDeparture(RideDto ride) {
+        if (containsDepartureOf(ride)) {
+            return stopRepository.findById(ride.getDeparture()).get();
+        } else {
+            throw new IllegalStateException(String.format(
+                "Cannot find departure with id: %d",
+                ride.getDeparture())
+            );
+        }
+    }
+
+    private Stop findRideArrival(RideDto ride) {
+        if (containsArrivalOf(ride)) {
+            return stopRepository.findById(ride.getArrival()).get();
+        } else {
+            throw new IllegalStateException(String.format(
+                "Cannot find arrival with id: %d",
+                ride.getArrival())
+            );
+        }
+    }
+
+    public Ride makeRide(RideDto data) {
+        try {
+            Stop departure = findRideDeparture(data);
+            Stop arrival = findRideArrival(data);
+            Ride ride = new Ride();
+            ride.setDeparture(departure);
+            ride.setArrival(arrival);
+            ride.setTrafficCondition(data.getTrafficCondition());
+            ride.setComment(data.getComment());
+            return ride;
+        } catch (IllegalStateException e) {
+            throw new IllegalStateException(
+                "Could not make the ride: " + e.getMessage()
+            );
+        }
+    }
+
+    public Ride updateRide(Ride ride, RideDto updatedData) {
+        try {
+            Stop departure = findRideDeparture(updatedData);
+            Stop arrival = findRideArrival(updatedData);
+            ride.setDeparture(departure);
+            ride.setArrival(arrival);
+            ride.setTrafficCondition(updatedData.getTrafficCondition());
+            ride.setComment(updatedData.getComment());
+            return ride;
+        } catch (IllegalStateException e) {
+            throw new IllegalStateException(
+                    "Could not update the ride: " + e.getMessage()
+            );
+        }
+    }
 
 }

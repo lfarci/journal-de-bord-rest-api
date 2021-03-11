@@ -59,12 +59,14 @@ public class DriverService {
      */
     public void create(DriverDto data) {
         Objects.requireNonNull(data, "\"data\" argument is null");
-        try {
+        if (driverRepository.existsById(data.getIdentifier())) {
+            throw new IllegalStateException(String.format(
+                "Driver with id %s already exist.",
+                data.getIdentifier()
+            ));
+        } else {
             Driver driver = new Driver(data.getIdentifier(), data.getObjective());
             driverRepository.save(driver);
-        } catch (DataIntegrityViolationException e) {
-            String msg = String.format("Driver with id %s already exist.", data.getIdentifier());
-            throw new IllegalStateException(msg);
         }
     }
 

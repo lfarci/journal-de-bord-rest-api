@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -14,17 +15,16 @@ import javax.validation.constraints.NotNull;
 public class RideDto {
 
     @NotNull
-    private Long rideId;
+    @Min(0)
+    private Long departure;
+
+    /**
+     * The arrival is nullable to represent rides that are not finished.
+     */
+    @Min(0)
+    private Long arrival;
 
     @NotNull
-    private StopDto departure;
-
-    private StopDto arrival;
-
-    @NotNull
-    @NotBlank
-    private String driverPseudonym;
-
     @NotNull
     private TrafficCondition trafficCondition;
 
