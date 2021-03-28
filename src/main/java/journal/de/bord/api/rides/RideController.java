@@ -2,10 +2,11 @@ package journal.de.bord.api.rides;
 
 import journal.de.bord.api.drivers.Driver;
 import journal.de.bord.api.drivers.DriverService;
-import journal.de.bord.api.locations.Location;
-import journal.de.bord.api.stops.Stop;
 import journal.de.bord.api.stops.StopService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * The controller handle the REST interface exposing the rides resources.
@@ -105,13 +107,25 @@ public class RideController {
      */
     @GetMapping(path = "/rides")
     public ResponseEntity rides(
-        Authentication user,
-        @PathVariable("driverId") String driverId
+            Authentication user,
+            @PathVariable("driverId") String driverId,
+            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(value = "size", defaultValue = "10", required = false) int size
     ) {
         try {
+            if (!driverService.exist(driverId)) {
+                String msg = String.format("Unknown driver with id: %s.", driverId);
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, msg);
+            }
             requireAuthenticatedOwner(user.getName(), driverId);
-            Driver driver = driverService.findById(driverId);
-            return ResponseEntity.ok(rideService.findAllRidesFor(driver));
+            Sort sort = Sort.by("departure.moment").descending();
+            PageRequest pageRequest = PageRequest.of(page, size, sort);
+            Page<Ride> ridesPage = rideService.findAllRidesFor(driverId, pageRequest);
+            return ResponseEntity.ok(new Object() {
+                public final List<Ride> rides = ridesPage.getContent();
+                public final int totalPages = ridesPage.getTotalPages();
+                public final boolean isLastPage = ridesPage.isLast();
+            });
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }

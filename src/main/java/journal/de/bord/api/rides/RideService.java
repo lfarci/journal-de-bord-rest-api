@@ -9,6 +9,9 @@ import journal.de.bord.api.drivers.DriverRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -55,9 +58,10 @@ public class RideService {
      * exist.
      * @throws NullPointerException when the driver is null.
      */
-    public List<Ride> findAllRidesFor(Driver driver) {
-        Objects.requireNonNull(driver, "\"driver\" argument is null");
-        return driver.getRides();
+    public Page<Ride> findAllRidesFor(String driverId, Pageable pageable) {
+        Objects.requireNonNull(driverId, "\"driverId\" argument is null");
+        Objects.requireNonNull(pageable, "\"pageable\" argument is null");
+        return rideRepository.findByDriverIdentifier(driverId, pageable);
     }
 
     public Long save(Driver driver, Ride ride) {
