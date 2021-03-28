@@ -25,6 +25,10 @@ public class DriverService {
         return driverRepository.existsById(identifier);
     }
 
+    public Long countDriverRides(String identifier) {
+        return driverRepository.countDriverRides(identifier);
+    }
+
     /**
      * Finds the driver for the given identifier.
      *

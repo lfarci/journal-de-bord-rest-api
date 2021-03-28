@@ -87,7 +87,8 @@ public class DriverController {
         try {
             String userId = authentication.getName();
             if (userId.equals(identifier)) {
-                return ResponseEntity.ok("statistics");
+                Long count = driverService.countDriverRides(identifier);
+                return ResponseEntity.ok(count);
             } else {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Restricted to the owner.");
             }
