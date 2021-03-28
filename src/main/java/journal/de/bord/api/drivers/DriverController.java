@@ -72,6 +72,31 @@ public class DriverController {
     }
 
     /**
+     * Gets a specific driver.
+     *
+     * @param identifier is the identifier of the driver to get.
+     * @return the response containing the driver.
+     * @throws ResponseStatusException 404 when the specified driver identifier
+     * could not be found.
+     */
+    @GetMapping(path = "/api/drivers/{identifier}/statistics")
+    public ResponseEntity statistics(
+            Authentication authentication,
+            @PathVariable("identifier") String identifier
+    ) {
+        try {
+            String userId = authentication.getName();
+            if (userId.equals(identifier)) {
+                return ResponseEntity.ok(driverService.getDriverStatistics(identifier));
+            } else {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Restricted to the owner.");
+            }
+        } catch (NullPointerException | IllegalArgumentException exception) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, exception.getMessage());
+        }
+    }
+
+    /**
      * Gets all the drivers.
      *
      * @return the response containing a list of locations.
