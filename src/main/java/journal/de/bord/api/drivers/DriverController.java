@@ -88,7 +88,10 @@ public class DriverController {
             String userId = authentication.getName();
             if (userId.equals(identifier)) {
                 Long count = driverService.countDriverRides(identifier);
-                return ResponseEntity.ok(count);
+                return ResponseEntity.ok(new Object() {
+                    public final Long rides = count;
+                    public final Long totalDistance = driverService.sumDriverRidesDistances(identifier);
+                });
             } else {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Restricted to the owner.");
             }

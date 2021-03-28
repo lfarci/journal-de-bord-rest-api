@@ -29,6 +29,10 @@ public class DriverService {
         return driverRepository.countDriverRides(identifier);
     }
 
+    public Long sumDriverRidesDistances(String identifier) {
+        return driverRepository.sumDriverRidesDistances(identifier);
+    }
+
     /**
      * Finds the driver for the given identifier.
      *
