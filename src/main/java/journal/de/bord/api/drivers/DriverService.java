@@ -25,12 +25,27 @@ public class DriverService {
         return driverRepository.existsById(identifier);
     }
 
-    public Long countDriverRides(String identifier) {
+    private Long countDriverRides(String identifier) {
         return driverRepository.countDriverRides(identifier);
     }
 
-    public Long sumDriverRidesDistances(String identifier) {
+    private Long countDriverLocations(String identifier) {
+        return driverRepository.countDriverLocations(identifier);
+    }
+
+    private Long sumDriverRidesDistances(String identifier) {
         return driverRepository.sumDriverRidesDistances(identifier);
+    }
+
+    public DriverStatistics getDriverStatistics(String identifier) {
+        if (exist(identifier)) {
+            Long rides = countDriverRides(identifier);
+            Long locations = countDriverLocations(identifier);
+            Long totalDistance = sumDriverRidesDistances(identifier);
+            return new DriverStatistics(rides, locations, totalDistance);
+        } else {
+            throw new IllegalArgumentException("Unknown driver: " + identifier);
+        }
     }
 
     /**

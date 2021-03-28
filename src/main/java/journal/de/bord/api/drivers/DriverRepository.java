@@ -9,6 +9,9 @@ public interface DriverRepository extends CrudRepository<Driver, String> {
     @Query("SELECT COUNT(r) FROM Ride r WHERE r.driver.identifier = ?1")
     Long countDriverRides(String identifier);
 
+    @Query("SELECT COUNT(l) FROM Location l WHERE l.driver.identifier = ?1")
+    Long countDriverLocations(String identifier);
+
     @Query(
         value = "SELECT SUM(a.odometer_value - d.odometer_value)\n" +
                 "FROM RIDE r\n" +
