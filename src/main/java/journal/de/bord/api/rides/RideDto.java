@@ -4,6 +4,7 @@ import journal.de.bord.api.stops.StopDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -22,12 +23,13 @@ public class RideDto {
      * The arrival is nullable to represent rides that are not finished.
      */
     @Min(0)
+    @Nullable
     private Long arrival;
 
-    @NotNull
-    @NotNull
+    @Nullable
     private TrafficCondition trafficCondition;
 
+    @Nullable
     private String comment;
 
 }

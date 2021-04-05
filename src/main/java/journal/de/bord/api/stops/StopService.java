@@ -117,12 +117,15 @@ public class StopService {
 
     public Ride makeRide(RideDto data) {
         try {
-            Stop departure = findRideDeparture(data);
-            Stop arrival = findRideArrival(data);
             Ride ride = new Ride();
-            ride.setDeparture(departure);
-            ride.setArrival(arrival);
-            ride.setTrafficCondition(data.getTrafficCondition());
+            ride.setDeparture(findRideDeparture(data));
+            if (data.getTrafficCondition() != null) {
+                ride.setTrafficCondition(data.getTrafficCondition());
+            }
+            if (data.getArrival() != null) {
+                Stop arrival = findRideArrival(data);
+                ride.setArrival(arrival);
+            }
             ride.setComment(data.getComment());
             return ride;
         } catch (IllegalStateException e) {
