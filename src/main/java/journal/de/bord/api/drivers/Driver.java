@@ -123,7 +123,7 @@ public class Driver {
     }
 
     public boolean ownsRideStops(RideDto ride) {
-        return ownsStopById(ride.getDeparture()) && ownsStopById(ride.getArrival());
+        return ownsStopById(ride.getDeparture()) && (ride.getArrival() == null || ownsStopById(ride.getArrival()));
     }
 
     public Ride getRideById(Long identifier) {
