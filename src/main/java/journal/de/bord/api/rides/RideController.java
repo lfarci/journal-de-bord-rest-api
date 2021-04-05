@@ -59,7 +59,7 @@ public class RideController {
             if (driver.ownsRideStops(data)) {
                 Ride ride = stopService.makeRide(data);
                 if (!ride.isValid()) {
-                    throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
+                    throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Invalid ride.");
                 }
                 Long id = rideService.save(driver, ride);
                 return new ResponseEntity(new Object() {

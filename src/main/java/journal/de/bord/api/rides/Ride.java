@@ -23,7 +23,6 @@ import java.time.LocalDateTime;
     })
 })
 @Data
-@NoArgsConstructor
 public class Ride {
 
     @Id
@@ -91,6 +90,13 @@ public class Ride {
         this.comment = null;
     }
 
+    public Ride() {
+        departure = null;
+        arrival = null;
+        trafficCondition = TrafficCondition.CALM;
+        comment = null;
+    }
+
     /**
      * Tells if this ride is done. A ride is done when the driver is arrived to its destination.
      *
@@ -108,7 +114,8 @@ public class Ride {
 
     @JsonIgnore
     public boolean isValid() {
-        return arrival.isAfter(departure)
-                && arrival.getOdometerValue() > departure.getOdometerValue();
+        return !isDone() || (arrival.isAfter(departure)
+                && arrival.getOdometerValue() > departure.getOdometerValue());
     }
+
 }
